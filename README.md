@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)  
 📢 *We will release the full code, dataset, and system demo upon paper acceptance.*
 
-## 📖 Background & Motivation
+## 📖 Background
 
 Biodiversity protection increasingly relies on intelligent wildlife monitoring. While current deep learning methods excel at species classification, they fall short in interpreting **complex animal behaviors**, especially from large-scale, unstructured camera trap data. In addition, non-computer-expert zoologists face difficulties using and interpreting outputs from these black-box models.
 
@@ -11,7 +11,7 @@ To bridge this gap, we propose **EKG-WildBehavior**, a novel ecological knowledg
 
 ---
 
-## 🧠 Key Features
+## 🔑 Key Features
 
 Our approach integrates **multi-modal information extraction**, **knowledge graph construction**, and **natural language generation** in a unified framework:
 
@@ -40,15 +40,19 @@ Our approach integrates **multi-modal information extraction**, **knowledge grap
 ---
 
 ## 📂 Project Structure
+
+```
 EKG-WildBehavior/
-├── docs/ # Paper, architecture diagrams
-├── configs/ # Model configuration files
-├── dataset/ # Data parsing & annotation tools (TBA)
-├── models/ # Model definitions
-├── kg_module/ # Knowledge graph construction & query
-├── generation/ # Text generation module
-├── system/ # System frontend/backend (TBA)
-└── README.md
+├── docs/           # Paper, architecture diagrams
+├── configs/        # Model configuration files
+├── dataset/        # Data parsing & annotation tools (TBA)
+├── models/         # Model definitions
+├── kg_module/      # Knowledge graph construction & query
+├── generation/     # Text generation module
+├── system/         # System frontend/backend (TBA)
+└── README.md       # Project documentation
+```
+
 
 
 ---
@@ -62,6 +66,5 @@ This project will be released under the [Apache 2.0 License](./LICENSE) after pa
 ## 📬 Contact
 
 For academic collaboration or questions, please reach out to:  
-📧 bhh01@bjfu.edu.cn  
-🌐 [Your Website or Lab Page] *(optional)*
+📧 chao_m@bjfu.edu.cn
 
