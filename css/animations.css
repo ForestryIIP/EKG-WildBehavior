@@ -1,0 +1,344 @@
+/* 
+ * animations-updated.css - Enhanced animation styles for EKG-WildBehavior
+ * Professional scientific animations with smooth transitions
+ */
+
+/* General Animation Timing */
+:root {
+    --animation-short: 0.3s;
+    --animation-medium: 0.6s;
+    --animation-long: 1s;
+    --animation-extra-long: 2s;
+    --animation-cubic: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --animation-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Base Animation Classes */
+.animate {
+    animation-fill-mode: forwards;
+}
+
+.animate-infinite {
+    animation-iteration-count: infinite;
+}
+
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+.animate-delay-500 { animation-delay: 0.5s; }
+.animate-delay-600 { animation-delay: 0.6s; }
+.animate-delay-700 { animation-delay: 0.7s; }
+.animate-delay-800 { animation-delay: 0.8s; }
+.animate-delay-900 { animation-delay: 0.9s; }
+.animate-delay-1000 { animation-delay: 1s; }
+
+/* Fade Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn var(--animation-medium) var(--animation-cubic) forwards;
+}
+
+@keyframes fadeInUp {
+    from { 
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp var(--animation-medium) var(--animation-cubic) forwards;
+}
+
+@keyframes fadeInDown {
+    from { 
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-down {
+    animation: fadeInDown var(--animation-medium) var(--animation-cubic) forwards;
+}
+
+@keyframes fadeInLeft {
+    from { 
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.fade-in-left {
+    animation: fadeInLeft var(--animation-medium) var(--animation-cubic) forwards;
+}
+
+@keyframes fadeInRight {
+    from { 
+        opacity: 0;
+        transform: translateX(40px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.fade-in-right {
+    animation: fadeInRight var(--animation-medium) var(--animation-cubic) forwards;
+}
+
+/* Scale Animations */
+@keyframes scaleIn {
+    from { 
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to { 
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.scale-in {
+    animation: scaleIn var(--animation-medium) var(--animation-spring) forwards;
+}
+
+@keyframes scaleInFast {
+    from { 
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to { 
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.scale-in-fast {
+    animation: scaleInFast var(--animation-short) var(--animation-cubic) forwards;
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.1); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.1); }
+    70% { transform: scale(1); }
+}
+
+.heartbeat {
+    animation: heartbeat 2s ease-in-out infinite;
+}
+
+/* Rotation Animations */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin-slow {
+    animation: spinSlow 10s linear infinite;
+}
+
+@keyframes spinReverse {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+}
+
+.spin-reverse {
+    animation: spinReverse 3s linear infinite;
+}
+
+/* Movement Animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
+}
+
+.float {
+    animation: float 5s ease-in-out infinite;
+}
+
+@keyframes floatSm {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+
+.float-sm {
+    animation: floatSm 3s ease-in-out infinite;
+}
+
+@keyframes wave {
+    0% { transform: translateX(0) translateY(0); }
+    25% { transform: translateX(-5px) translateY(5px); }
+    50% { transform: translateX(0) translateY(0); }
+    75% { transform: translateX(5px) translateY(5px); }
+    100% { transform: translateX(0) translateY(0); }
+}
+
+.wave {
+    animation: wave 4s ease-in-out infinite;
+}
+
+/* Attention-grabbing Animations */
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(52, 152, 219, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+}
+
+.pulse {
+    animation: pulse 2s var(--animation-cubic) infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-20px); }
+    60% { transform: translateY(-10px); }
+}
+
+.bounce {
+    animation: bounce 2s infinite;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.8s ease-in-out;
+}
+
+/* Special Effects */
+@keyframes glowPulse {
+    0% { box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(52, 152, 219, 0.8); }
+    100% { box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); }
+}
+
+.glow-pulse {
+    animation: glowPulse 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -100% 0; }
+    100% { background-position: 100% 0; }
+}
+
+.shimmer {
+    background: linear-gradient(90deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.2) 50%, 
+        rgba(255,255,255,0) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* Graph and Diagram Animations */
+@keyframes drawLine {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+}
+
+.draw-line {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawLine 2s var(--animation-cubic) forwards;
+}
+
+@keyframes fadeStroke {
+    from { stroke-opacity: 0; }
+    to { stroke-opacity: 1; }
+}
+
+.fade-stroke {
+    animation: fadeStroke 1s var(--animation-cubic) forwards;
+}
+
+@keyframes growBar {
+    from { height: 0; }
+    to { height: 100%; }
+}
+
+.grow-bar {
+    animation: growBar 1s var(--animation-cubic) forwards;
+}
+
+/* Data Flow Animations */
+@keyframes flowRight {
+    0% { 
+        transform: translateX(-10px);
+        opacity: 0; 
+    }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { 
+        transform: translateX(10px);
+        opacity: 0; 
+    }
+}
+
+.flow-right {
+    animation: flowRight 1.5s infinite;
+}
+
+@keyframes dataPoint {
+    0% { 
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+    50% { 
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% { 
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+}
+
+.data-point {
+    animation: dataPoint 2s infinite;
+}
+
+/* Knowledge Graph Node Animations */
+@keyframes nodeGlow {
+    0% { 
+        filter: drop-shadow(0 0 2px rgba(52, 152, 219, 0.5)); 
+    }
+    50% { 
+        filter: drop-shadow(0 0 10px rgba(52, 152, 219, 0.8)); 
+    }
+    100% { 
+        filter: drop-shadow(0 0 2px rgba(52, 152, 219, 0.5)); 
+    }
+}
