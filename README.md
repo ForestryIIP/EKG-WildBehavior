@@ -1,6 +1,7 @@
 # EKG-WildBehavior
-[![Paper](https://img.shields.io/badge/Paper-TKDE%202025-brightgreen)](https://link-to-paper.com)  
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)  
+[![Paper](https://img.shields.io/badge/Paper-ESWA%202025-brightgreen)](https://link-to-paper.com)
+
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE) 
 📢 *We will release the full code, dataset, and system demo upon paper acceptance.*
 
 ## 📖 Background
