@@ -80,6 +80,96 @@
             </div>
         </section>
 
+        <!-- Applications Section -->
+        <section id="applications" class="full-section">
+            <div class="section-title">
+                <h2>Applications</h2>
+                <div class="title-underline"><span></span></div>
+            </div>
+            <div class="section-content">
+                <div class="application-container">
+                    <div class="species-selection">
+                        <h3>Select Species</h3>
+                        <div class="species-grid">
+                            <div class="species-item" data-species="ElaphodusCephalophus">
+                                <div class="species-icon"><img src="./data/ElaphodusCephalophus.png" alt="ElaphodusCephalophus icon"></div>
+                                <div class="species-name">Elaphodus<br>Cephalophus</div>
+                            </div>
+                            <div class="species-item" data-species="Porcupine">
+                                <div class="species-icon"><img src="./data/Porcupine.png" alt="Porcupine icon"></div>
+                                <div class="species-name">Porcupine</div>
+                            </div>
+                            <div class="species-item" data-species="Panda">
+                                <div class="species-icon"><img src="./data/Panda.png" alt="Panda icon"></div>
+                                <div class="species-name">Panda</div>
+                            </div>
+                            <div class="species-item" data-species="PseudoisNayaur">
+                                <div class="species-icon"><img src="./data/PseudoisNayaur.png" alt="PseudoisNayaur icon"></div>
+                                <div class="species-name">Pseudois<br>Nayaur</div>
+                            </div>
+                            <div class="species-item" data-species="RedPanda">
+                                <div class="species-icon"><img src="./data/RedPanda.png" alt="RedPanda icon"></div>
+                                <div class="species-name">Red<br>Panda</div>
+                            </div>
+                            <div class="species-item" data-species="RhinopithecusRoxellana">
+                                <div class="species-icon"><img src="./data/RhinopithecusRoxellana.png" alt="RhinopithecusRoxellana icon"></div>
+                                <div class="species-name">Rhinopithecus<br>Roxellana</div>
+                            </div>
+                            <div class="species-item" data-species="ManchurianTiger">
+                                <div class="species-icon"><img src="./data/AmurTiger.png" alt="ManchurianTiger icon"></div>
+                                <div class="species-name">Amur<br>Tiger</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="application-interface">
+                        <div class="image-selection">
+                            <h3>Select Images</h3>
+                            <div class="images-container" id="species-images">
+                                <!-- Species images will be dynamically loaded here -->
+                                <div class="no-selection-message">Select a species to view available images</div>
+                            </div>
+                            <button id="upload-button" class="primary-button" disabled>
+                                <i class="fas fa-upload"></i> Upload Selected Images
+                            </button>
+                        </div>
+
+                        <div class="analysis-options">
+                            <h3>Analysis Options</h3>
+                            <div class="analysis-buttons">
+                                <button class="analysis-button" data-analysis="detection">
+                                    <i class="fas fa-object-group"></i>
+                                    <span>Object Detection</span>
+                                </button>
+                                <button class="analysis-button" data-analysis="segmentation">
+                                    <i class="fas fa-cut"></i>
+                                    <span>Segmentation</span>
+                                </button>
+                                <button class="analysis-button" data-analysis="knowledge-graph">
+                                    <i class="fas fa-project-diagram"></i>
+                                    <span>Knowledge Graph</span>
+                                </button>
+                                <button class="analysis-button" data-analysis="description">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>Text Description</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-results">
+                        <h3>Analysis Results</h3>
+                        <div id="results-container" class="results-display">
+                            <div class="results-placeholder">
+                                <i class="fas fa-microscope"></i>
+                                <p>Select a species, choose images, and click an analysis option to view results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Innovations Section -->
         <section id="innovations" class="full-section">
             <div class="section-title">
@@ -208,95 +298,6 @@
             </div>
         </section>
 
-        <!-- Applications Section -->
-        <section id="applications" class="full-section">
-            <div class="section-title">
-                <h2>Applications</h2>
-                <div class="title-underline"><span></span></div>
-            </div>
-            <div class="section-content">
-                <div class="application-container">
-                    <div class="species-selection">
-                        <h3>Select Species</h3>
-                        <div class="species-grid">
-                            <div class="species-item" data-species="ElaphodusCephalophus">
-                                <div class="species-icon"><img src="./data/ElaphodusCephalophus.png" alt="ElaphodusCephalophus icon"></div>
-                                <div class="species-name">Elaphodus<br>Cephalophus</div>
-                            </div>
-                            <div class="species-item" data-species="Porcupine">
-                                <div class="species-icon"><img src="./data/Porcupine.png" alt="Porcupine icon"></div>
-                                <div class="species-name">Porcupine</div>
-                            </div>
-                            <div class="species-item" data-species="Panda">
-                                <div class="species-icon"><img src="./data/Panda.png" alt="Panda icon"></div>
-                                <div class="species-name">Panda</div>
-                            </div>
-                            <div class="species-item" data-species="PseudoisNayaur">
-                                <div class="species-icon"><img src="./data/PseudoisNayaur.png" alt="PseudoisNayaur icon"></div>
-                                <div class="species-name">Pseudois<br>Nayaur</div>
-                            </div>
-                            <div class="species-item" data-species="RedPanda">
-                                <div class="species-icon"><img src="./data/RedPanda.png" alt="RedPanda icon"></div>
-                                <div class="species-name">Red<br>Panda</div>
-                            </div>
-                            <div class="species-item" data-species="RhinopithecusRoxellana">
-                                <div class="species-icon"><img src="./data/RhinopithecusRoxellana.png" alt="RhinopithecusRoxellana icon"></div>
-                                <div class="species-name">Rhinopithecus<br>Roxellana</div>
-                            </div>
-                            <div class="species-item" data-species="ManchurianTiger">
-                                <div class="species-icon"><img src="./data/AmurTiger.png" alt="ManchurianTiger icon"></div>
-                                <div class="species-name">Amur<br>Tiger</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="application-interface">
-                        <div class="image-selection">
-                            <h3>Select Images</h3>
-                            <div class="images-container" id="species-images">
-                                <!-- Species images will be dynamically loaded here -->
-                                <div class="no-selection-message">Select a species to view available images</div>
-                            </div>
-                            <button id="upload-button" class="primary-button" disabled>
-                                <i class="fas fa-upload"></i> Upload Selected Images
-                            </button>
-                        </div>
-                        
-                        <div class="analysis-options">
-                            <h3>Analysis Options</h3>
-                            <div class="analysis-buttons">
-                                <button class="analysis-button" data-analysis="detection">
-                                    <i class="fas fa-object-group"></i>
-                                    <span>Object Detection</span>
-                                </button>
-                                <button class="analysis-button" data-analysis="segmentation">
-                                    <i class="fas fa-cut"></i>
-                                    <span>Segmentation</span>
-                                </button>
-                                <button class="analysis-button" data-analysis="knowledge-graph">
-                                    <i class="fas fa-project-diagram"></i>
-                                    <span>Knowledge Graph</span>
-                                </button>
-                                <button class="analysis-button" data-analysis="description">
-                                    <i class="fas fa-file-alt"></i>
-                                    <span>Text Description</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="analysis-results">
-                        <h3>Analysis Results</h3>
-                        <div id="results-container" class="results-display">
-                            <div class="results-placeholder">
-                                <i class="fas fa-microscope"></i>
-                                <p>Select a species, choose images, and click an analysis option to view results</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- Contact Section -->
         <section id="contact" class="full-section">
@@ -378,6 +379,13 @@
         </div>
     </div>
 
+    <script>
+        axios.post('http://localhost:6006/yolo_process', {
+            image: base64Image
+        }).then(res => {
+        console.log("YOLO 结果：", res.data);
+        });
+    </script>
     <script src="js/main.js"></script>
     <script src="js/workflow.js"></script>
     <script src="js/knowledge-graph.js"></script>

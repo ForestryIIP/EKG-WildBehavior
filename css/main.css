@@ -250,6 +250,23 @@ main {
     min-height: 100vh;
 }
 
+/* Method section image styling */
+.method-image-container {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 40px;
+    padding: 20px;
+    text-align: center;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.method-structure-image {
+    width: 100%;
+    height: auto;
+}
+
 .full-section {
     padding: var(--section-padding);
     position: relative;
