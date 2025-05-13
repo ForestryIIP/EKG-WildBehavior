@@ -2,6 +2,7 @@
 [![Paper](https://img.shields.io/badge/Paper-ESWA%202025-brightgreen)](https://link-to-paper.com)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE) 
+Survey Questionnaire: EKG-WildBehavior – Automatic Wild Animal Behavior Analysis System Research： https://docs.qq.com/form/page/DTXVYRENtRk1jbk9x
 📢 *We will release the full code, dataset, and system demo upon paper acceptance.*
 
 ## 📖 Background
@@ -25,8 +26,9 @@ Our approach integrates **multi-modal information extraction**, **knowledge grap
 3. **Textual Behavior Description**  
    Generate natural language summaries from the knowledge graph using LLMs to support zoologist-friendly interpretation.
 
-4. **System Design** *(To be added upon release)*  
+4. **System Design**
    A user-friendly web system will be developed supporting image upload, KG visualization, and auto report generation.
+   The link of our system is as follow:
 
 ---
 
