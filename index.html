@@ -377,6 +377,26 @@
             <div id="modal-caption"></div>
         </div>
     </div>
+<script>
+document.getElementById("upload-button").addEventListener("click", async () => {
+    const fileInput = document.querySelector("input[type='file']");
+    if (!fileInput || fileInput.files.length === 0) return;
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+        const base64data = reader.result.split(',')[1];
+
+        // 示例调用YOLO
+        const response = await axios.post("http://127.0.0.1:6006/yolo_process", {
+            image: base64data
+        });
+
+        console.log("YOLO Result:", response.data);
+    };
+    reader.readAsDataURL(file);
+});
+</script>
 
     <script src="js/main.js"></script>
     <script src="js/workflow.js"></script>
