@@ -3,8 +3,6 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE) 
 
-Survey Questionnaire: EKG-WildBehavior – Automatic Wild Animal Behavior Analysis System Research： https://docs.qq.com/form/page/DTXVYRENtRk1jbk9x
-
 📢 *We will release the full code, dataset, and system demo upon paper acceptance.*
 
 ## 📖 Background
