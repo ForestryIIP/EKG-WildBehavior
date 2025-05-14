@@ -386,7 +386,16 @@
             <div id="modal-caption"></div>
         </div>
     </div>
-
+    <script>
+        fetch("http://127.0.0.1:5000/api/hello")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("response").innerText = data.message;
+            })
+            .catch(error => {
+                document.getElementById("response").innerText = "Error: " + error;
+            });
+    </script>
     <script src="js/main.js"></script>
     <script src="js/workflow.js"></script>
     <script src="js/knowledge-graph.js"></script>
