@@ -380,11 +380,14 @@
     </div>
 
     <script>
-        axios.post('http://localhost:6006/yolo_process', {
-            image: base64Image
-        }).then(res => {
-        console.log("YOLO 结果：", res.data);
-        });
+        fetch("http://127.0.0.1:5000/api/hello")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("response").innerText = data.message;
+            })
+            .catch(error => {
+                document.getElementById("response").innerText = "Error: " + error;
+            });
     </script>
     <script src="js/main.js"></script>
     <script src="js/workflow.js"></script>
