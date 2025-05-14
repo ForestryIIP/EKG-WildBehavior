@@ -36,6 +36,13 @@
     </header>
 
     <main>
+        <div class="questionnaire-banner">
+            <p>A Questionnaire about our system:
+                <a href="https://docs.qq.com/form/page/DTXVYRENtRk1jbk9x" target="_blank">
+                https://docs.qq.com/form/page/DTXVYRENtRk1jbk9x
+                </a>
+            </p>
+        </div>
         <!-- Method Section -->
         <section id="method" class="full-section">
             <div class="section-title">
@@ -382,13 +389,6 @@
         </div>
     </div>
 
-    <script>
-        axios.post('http://localhost:6006/yolo_process', {
-            image: base64Image
-        }).then(res => {
-        console.log("YOLO 结果：", res.data);
-        });
-    </script>
     <script src="js/main.js"></script>
     <script src="js/workflow.js"></script>
     <script src="js/knowledge-graph.js"></script>

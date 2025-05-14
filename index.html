@@ -36,6 +36,14 @@
     </header>
 
     <main>
+        <div class="questionnaire-banner">
+            <p>A Questionnaire about our system:
+                <a href="https://docs.qq.com/form/page/DTXVYRENtRk1jbk9x" target="_blank">
+                https://docs.qq.com/form/page/DTXVYRENtRk1jbk9x
+                </a>
+            </p>
+        </div>
+
         <!-- Method Section -->
         <section id="method" class="full-section">
             <div class="section-title">
@@ -379,29 +387,6 @@
         </div>
     </div>
 
-    <h1>Frontend on GitHub Pages</h1>
-    <button onclick="fetchData()">Call Flask Backend</button>
-    <div id="response"></div>
-
-    <script>
-        async function fetchData() {
-            const name = prompt("Enter your name:", "User");
-            if (name) {
-                try {
-                    // 注意：这里需要替换成你的Flask后端实际URL
-                    // 本地开发时可能是 'http://localhost:5000/api/hello'
-                    // 部署后可能是 'https://your-flask-backend.herokuapp.com/api/hello'
-                    const response = await fetch('http://localhost:5000/api/hello?name=' + encodeURIComponent(name));
-                    const data = await response.json();
-                    document.getElementById('response').innerHTML = 
-                        `<p>Response from backend: ${data.message}</p>`;
-                } catch (error) {
-                    document.getElementById('response').innerHTML = 
-                        `<p style="color:red;">Error calling backend: ${error}</p>`;
-                }
-            }
-        }
-    </script>
     <script src="js/main.js"></script>
     <script src="js/workflow.js"></script>
     <script src="js/knowledge-graph.js"></script>
