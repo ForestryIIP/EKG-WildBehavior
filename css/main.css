@@ -1118,3 +1118,381 @@ footer {
         transform: rotate(360deg);
     }
 }
+
+/* 检测图像样式 */
+.detection-image {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.5s ease;
+}
+
+.detection-image img {
+    width: 100%;
+    display: block;
+}
+
+.detection-image.zoomed {
+    transform: scale(1.5);
+    transform-origin: center center;
+    z-index: 10;
+}
+
+/* 控制按钮样式 */
+.detection-controls, .segmentation-controls {
+    margin-top: 1rem;
+}
+
+.control-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.control-button {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.control-button:hover {
+    background-color: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+/* 分割图像样式 */
+.segmentation-image {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.5s ease;
+}
+
+.segmentation-image img {
+    width: 100%;
+    display: block;
+    transition: opacity 0.3s ease;
+}
+
+.segmentation-image.zoomed {
+    transform: scale(1.5);
+    transform-origin: center center;
+    z-index: 10;
+}
+
+/* 分割类别项目样式 */
+.segment-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    padding: 8px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.segment-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    margin-right: 8px;
+}
+
+.segment-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.segment-confidence {
+    margin: 0 8px;
+    font-weight: bold;
+}
+
+.segment-bar {
+    flex: 1;
+    height: 6px;
+    background-color: #eee;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 0 8px;
+}
+
+.segment-bar-fill {
+    height: 100%;
+    background-color: #3498db;
+    width: 0;
+}
+
+.segment-area {
+    width: 100%;
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 4px;
+    margin-left: 24px;
+}
+
+/* 结果内容布局 */
+.result-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+@media (min-width: 992px) {
+    .result-content {
+        flex-direction: row;
+    }
+    
+    .result-visualization {
+        width: 50%;
+    }
+    
+    .result-details {
+        width: 50%;
+    }
+}
+
+/* 结果详情样式 */
+.result-details {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.result-summary {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.result-summary p {
+    line-height: 1.5;
+    color: #333;
+}
+
+.detection-classes h5, .segmentation-classes h5, .result-metrics h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.metric-group {
+    margin-bottom: 15px;
+}
+
+.metric {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.metric-label {
+    color: #7f8c8d;
+}
+
+.metric-value {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+/* 美化Object Detection样式 */
+.detection-image {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.detection-image:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.detection-image img {
+    width: 100%;
+    display: block;
+}
+
+.detection-image.zoomed {
+    position: relative;
+    z-index: 100;
+    transform: scale(1.5);
+    transform-origin: center center;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+}
+
+/* 控制按钮样式改进 */
+.control-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 15px 0;
+}
+
+.control-button {
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    color: #495057;
+    transition: all 0.3s ease;
+}
+
+.control-button:hover {
+    background-color: #3498db;
+    color: white;
+    border-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.control-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* 美化置信度滑块 */
+.confidence-slider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-top: 10px;
+}
+
+.confidence-slider label {
+    font-size: 0.85rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+.slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: linear-gradient(to right, #3498db, #e74c3c);
+    border-radius: 3px;
+    outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border: 2px solid #3498db;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
+
+.slider-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #3498db;
+    width: 45px;
+    text-align: center;
+    background-color: #e9ecef;
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+
+/* 改进类别项目样式 */
+.class-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 12px;
+    background-color: #f8f9fa;
+    padding: 10px 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.class-item:hover {
+    background-color: #f1f3f5;
+    transform: translateX(5px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.class-color {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    margin-right: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.class-name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #343a40;
+}
+
+.class-confidence {
+    margin: 0 10px;
+    font-weight: 600;
+    color: #495057;
+    min-width: 52px;
+    text-align: right;
+}
+
+.class-bar {
+    flex: 2;
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.class-bar-fill {
+    height: 100%;
+    background-color: #3498db;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}

@@ -391,13 +391,13 @@ function loadSpeciesImages(species) {
     const imagesContainer = document.getElementById('species-images');
     if (!imagesContainer) return;
     
-    // Remove no-selection message if present
+    // 移除no-selection消息如果存在
     const noSelectionMsg = imagesContainer.querySelector('.no-selection-message');
     if (noSelectionMsg) {
         noSelectionMsg.remove();
     }
     
-    // Show loading animation
+    // 显示加载动画
     imagesContainer.innerHTML = `
         <div class="loading-indicator">
             <div class="loader"></div>
@@ -405,37 +405,60 @@ function loadSpeciesImages(species) {
         </div>
     `;
     
-    // Simulate loading delay
-    setTimeout(() => {
-        // Clear container
-        imagesContainer.innerHTML = '';
-        
-        // Generate sample images for the species
-        const numImages = 4;
-        
-        for (let i = 1; i <= numImages; i++) {
-            // Create image container
-            const imageItem = document.createElement('div');
-            imageItem.className = 'image-item';
+    // 从本地Flask后端获取图片
+    fetch(`http://localhost:5000/api/species/${species}/images`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 清除加载指示器
+            imagesContainer.innerHTML = '';
             
-            // Add image and checkbox
-            imageItem.innerHTML = `
-            <img src="./data/${species.toLowerCase()}${i}.jpg" alt="${species} ${i}">
-            <div class="image-checkbox">
-                <i class="fas fa-check"></i>
-            </div>
+            // 添加图片到容器
+            if (data.images && data.images.length > 0) {
+                data.images.forEach(imageInfo => {
+                    // 创建图片容器
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'image-item';
+                    imageItem.setAttribute('data-image-id', imageInfo.id);
+                    
+                    // 添加图片和复选框
+                    imageItem.innerHTML = `
+                        <img src="http://localhost:5000${imageInfo.url}" alt="${species} ${imageInfo.id}">
+                        <div class="image-checkbox">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    `;
+                    
+                    // 添加点击处理程序以切换选择
+                    imageItem.addEventListener('click', function() {
+                        this.classList.toggle('selected');
+                        updateUploadButtonState();
+                    });
+                    
+                    // 添加图片到容器
+                    imagesContainer.appendChild(imageItem);
+                });
+            } else {
+                imagesContainer.innerHTML = `
+                    <div class="no-images-message">
+                        <p>No images available for ${species}</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading images:', error);
+            imagesContainer.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Error loading images: ${error.message}</p>
+                </div>
             `;
-            
-            // Add click handler to toggle selection
-            imageItem.addEventListener('click', function() {
-                this.classList.toggle('selected');
-                updateUploadButtonState();
-            });
-            
-            // Add the image to the container
-            imagesContainer.appendChild(imageItem);
-        }
-    }, 1500);
+        });
 }
 
 /**
@@ -460,31 +483,31 @@ function setupAnalysisButtons() {
     
     if (!analysisButtons.length || !resultsContainer) return;
     
-    // Handle analysis button clicks
+    // 处理分析按钮点击
     analysisButtons.forEach(button => {
         button.addEventListener('click', function() {
-            // Check if species is selected
+            // 检查是否选择了物种
             const selectedSpecies = document.querySelector('.species-item.active');
             if (!selectedSpecies) {
                 showNotification('Please select a species first', 'warning');
                 return;
             }
             
-            // Check if at least one image is selected
+            // 检查是否至少选择了一张图片
             const selectedImages = document.querySelectorAll('.image-item.selected');
             if (selectedImages.length === 0) {
                 showNotification('Please select at least one image', 'warning');
                 return;
             }
             
-            // Get analysis type
+            // 获取分析类型
             const analysisType = this.getAttribute('data-analysis');
             
-            // Highlight active button
+            // 高亮活动按钮
             analysisButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
             
-            // Show loading state
+            // 显示加载状态
             resultsContainer.innerHTML = `
                 <div class="loading-indicator">
                     <div class="loader"></div>
@@ -492,11 +515,74 @@ function setupAnalysisButtons() {
                 </div>
             `;
             
-            // Simulate analysis process
-            setTimeout(() => {
-                showAnalysisResults(analysisType, selectedSpecies.getAttribute('data-species'));
-            }, 2000);
+            // 获取选中的物种和图片ID
+            const species = selectedSpecies.getAttribute('data-species');
+            const imageId = selectedImages[0].getAttribute('data-image-id');
+            
+            // 调用相应的分析API
+            performAnalysis(analysisType, species, imageId, resultsContainer);
         });
+    });
+}
+
+/**
+ * 执行分析并显示结果
+ */
+function performAnalysis(analysisType, species, imageId, resultsContainer) {
+    const endpoint = `http://localhost:5000/api/analyze/${analysisType}`;
+    
+    fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            species: species,
+            imageId: imageId
+        }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // 根据分析类型显示结果
+        switch (analysisType) {
+            case 'detection':
+                showDetectionResults(resultsContainer, species, data);
+                break;
+                
+            case 'segmentation':
+                showSegmentationResults(resultsContainer, species, data);
+                break;
+                
+            case 'knowledge-graph':
+                showKnowledgeGraphResults(resultsContainer, species, data);
+                break;
+                
+            case 'description':
+                showDescriptionResults(resultsContainer, species, data);
+                break;
+                
+            default:
+                resultsContainer.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Unknown analysis type: ${analysisType}</p>
+                    </div>
+                `;
+        }
+    })
+    .catch(error => {
+        console.error(`Error performing ${analysisType} analysis:`, error);
+        resultsContainer.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Error: ${error.message}</p>
+            </div>
+        `;
     });
 }
 
@@ -554,11 +640,18 @@ function showAnalysisResults(analysisType, species) {
 }
 
 /**
- * Show object detection results
- * @param {HTMLElement} container - Results container
- * @param {string} species - Selected species
+ * 显示目标检测结果
  */
-function showDetectionResults(container, species) {
+function showDetectionResults(container, species, data) {
+    // 定义不同对象类型的颜色
+    const objectColors = {
+        "tiger": "#e74c3c",
+        "panda": "#e74c3c",
+        "tree": "#27ae60",
+        "grass": "#3498db",
+        "default": "#f39c12"
+    };
+    
     container.innerHTML = `
         <div class="analysis-result">
             <h4>Object Detection Results</h4>
@@ -566,13 +659,7 @@ function showDetectionResults(container, species) {
             <div class="result-content">
                 <div class="result-visualization">
                     <div class="detection-image">
-                        <img src="/api/placeholder/200/150" alt="${species} detection">
-                        <div class="detection-box" style="top: 20%; left: 15%; width: 70%; height: 60%;">
-                            <div class="detection-label">${species} (95.8%)</div>
-                        </div>
-                        <div class="detection-box detection-box-secondary" style="top: 60%; left: 65%; width: 25%; height: 30%;">
-                            <div class="detection-label">Tree (87.3%)</div>
-                        </div>
+                        <img src="${data.image}" alt="${species} detection">
                     </div>
                     <div class="detection-controls">
                         <div class="control-buttons">
@@ -599,47 +686,41 @@ function showDetectionResults(container, species) {
                 
                 <div class="result-details">
                     <div class="result-summary">
-                        <p>The YOLO-based detection model successfully identified a <strong>${species}</strong> in the image with high confidence. The bounding box indicates the precise location of the animal within the frame.</p>
+                        <p>The YOLO-based detection model successfully identified ${data.objects.length} objects in the image, including a <strong>${species}</strong> with high confidence.</p>
                     </div>
                     
                     <div class="detection-classes">
                         <h5>Detected Classes</h5>
-                        <div class="class-item">
-                            <div class="class-color" style="background-color: #e74c3c;"></div>
-                            <div class="class-name">${species}</div>
-                            <div class="class-confidence">95.8%</div>
-                            <div class="class-bar">
-                                <div class="class-bar-fill" style="width: 95.8%;"></div>
-                            </div>
-                        </div>
-                        <div class="class-item">
-                            <div class="class-color" style="background-color: #27ae60;"></div>
-                            <div class="class-name">Tree</div>
-                            <div class="class-confidence">87.3%</div>
-                            <div class="class-bar">
-                                <div class="class-bar-fill" style="width: 87.3%;"></div>
-                            </div>
-                        </div>
-                        <div class="class-item">
-                            <div class="class-color" style="background-color: #3498db;"></div>
-                            <div class="class-name">Grass</div>
-                            <div class="class-confidence">82.1%</div>
-                            <div class="class-bar">
-                                <div class="class-bar-fill" style="width: 82.1%;"></div>
-                            </div>
-                        </div>
+                        ${data.objects.map(obj => {
+                            // 确定对象类型的颜色
+                            const objType = Object.keys(objectColors).find(type => 
+                                obj.label.toLowerCase().includes(type)
+                            ) || "default";
+                            const color = obj.color || objectColors[objType];
+                            
+                            return `
+                                <div class="class-item" data-confidence="${obj.confidence}">
+                                    <div class="class-color" style="background-color: ${color};"></div>
+                                    <div class="class-name">${obj.label.charAt(0).toUpperCase() + obj.label.slice(1)}</div>
+                                    <div class="class-confidence">${obj.confidence.toFixed(1)}%</div>
+                                    <div class="class-bar">
+                                        <div class="class-bar-fill" style="width: ${obj.confidence}%; background-color: ${color};"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                     
                     <div class="result-metrics">
                         <div class="metric-group">
                             <h5>Detection Performance</h5>
                             <div class="metric">
-                                <div class="metric-label">Confidence Score:</div>
-                                <div class="metric-value">95.8%</div>
+                                <div class="metric-label">Objects Detected:</div>
+                                <div class="metric-value">${data.objects.length}</div>
                             </div>
                             <div class="metric">
-                                <div class="metric-label">IoU Score:</div>
-                                <div class="metric-value">0.89</div>
+                                <div class="metric-label">Avg. Confidence Score:</div>
+                                <div class="metric-value">${(data.objects.reduce((sum, obj) => sum + obj.confidence, 0) / data.objects.length).toFixed(1)}%</div>
                             </div>
                             <div class="metric">
                                 <div class="metric-label">Processing Time:</div>
@@ -658,41 +739,8 @@ function showDetectionResults(container, species) {
                                 <div class="metric-value">640x640</div>
                             </div>
                             <div class="metric">
-                                <div class="metric-label">Optimization:</div>
-                                <div class="metric-value">TensorRT</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="detection-history">
-                        <h5>Detection History</h5>
-                        <div class="history-timeline">
-                            <div class="timeline-item">
-                                <div class="timeline-marker active"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-time">Now</div>
-                                    <div class="timeline-detail">
-                                        <strong>${species}</strong> detected (95.8%)
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="timeline-marker"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-time">10:23 AM</div>
-                                    <div class="timeline-detail">
-                                        <strong>${species}</strong> detected (92.3%)
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="timeline-marker"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-time">09:15 AM</div>
-                                    <div class="timeline-detail">
-                                        <strong>Detection initialized</strong>
-                                    </div>
-                                </div>
+                                <div class="metric-label">IoU Threshold:</div>
+                                <div class="metric-value">0.45</div>
                             </div>
                         </div>
                     </div>
@@ -701,15 +749,7 @@ function showDetectionResults(container, species) {
         </div>
     `;
     
-    // Add animation to detection boxes
-    setTimeout(() => {
-        const detectionBoxes = container.querySelectorAll('.detection-box');
-        detectionBoxes.forEach(box => {
-            box.classList.add('active');
-        });
-    }, 300);
-    
-    // Add functionality to control buttons
+    // 添加功能到控制按钮
     const controlButtons = container.querySelectorAll('.control-button');
     controlButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -718,7 +758,7 @@ function showDetectionResults(container, species) {
         });
     });
     
-    // Add functionality to confidence slider
+    // 添加功能到置信度滑块
     const confidenceSlider = container.querySelector('#confidence-threshold');
     const sliderValue = container.querySelector('.slider-value');
     
@@ -727,46 +767,21 @@ function showDetectionResults(container, species) {
             const value = this.value;
             sliderValue.textContent = `${value}%`;
             
-            // Apply threshold effect - hide detections below threshold
-            const detectionBoxes = container.querySelectorAll('.detection-box');
-            detectionBoxes.forEach(box => {
-                const labelElement = box.querySelector('.detection-label');
-                if (labelElement) {
-                    const confidenceText = labelElement.textContent;
-                    const confidenceMatch = confidenceText.match(/\((\d+\.\d+)%\)/);
-                    
-                    if (confidenceMatch) {
-                        const confidence = parseFloat(confidenceMatch[1]);
-                        
-                        if (confidence < value) {
-                            box.style.opacity = '0.2';
-                            box.style.borderStyle = 'dashed';
-                        } else {
-                            box.style.opacity = '1';
-                            box.style.borderStyle = 'solid';
-                        }
-                    }
-                }
-            });
-            
-            // Apply threshold to class items
+            // 对置信度低于阈值的类别应用视觉效果
             const classItems = container.querySelectorAll('.class-item');
             classItems.forEach(item => {
-                const confidenceElement = item.querySelector('.class-confidence');
-                if (confidenceElement) {
-                    const confidence = parseFloat(confidenceElement.textContent);
-                    
-                    if (confidence < value) {
-                        item.style.opacity = '0.4';
-                    } else {
-                        item.style.opacity = '1';
-                    }
+                const confidence = parseFloat(item.getAttribute('data-confidence'));
+                
+                if (confidence < value) {
+                    item.style.opacity = '0.4';
+                } else {
+                    item.style.opacity = '1';
                 }
             });
         });
     }
     
-    // Add animation to bars
+    // 为图表添加动画
     const classBarFills = container.querySelectorAll('.class-bar-fill');
     classBarFills.forEach(bar => {
         const width = bar.style.width;
@@ -777,32 +792,638 @@ function showDetectionResults(container, species) {
             bar.style.width = width;
         }, 500);
     });
+}
+
+/**
+ * 显示分割结果
+ */
+function showSegmentationResults(container, species, data) {
+    container.innerHTML = `
+        <div class="analysis-result segmentation-result">
+            <h4>Segmentation Results</h4>
+            
+            <div class="result-content">
+                <div class="result-visualization">
+                    <div class="segmentation-image">
+                        <img src="${data.image}" alt="${species} segmentation">
+                    </div>
+                    <div class="segmentation-controls">
+                        <div class="control-buttons">
+                            <button class="control-button" data-action="zoom-in">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button class="control-button" data-action="zoom-out">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button class="control-button" data-action="toggle-mask">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="control-button" data-action="download">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-details">
+                    <div class="result-summary">
+                        <p>Our CWA-SAM (Complex Wildlife Animal Segmentation Model) precisely segmented the ${species} from the background, achieving high precision pixel-level segmentation.</p>
+                    </div>
+                    
+                    <div class="segmentation-classes">
+                        <h5>Segmentation Classes</h5>
+                        ${data.segments ? data.segments.map(segment => `
+                            <div class="segment-item">
+                                <div class="segment-color" style="background-color: ${segment.label === species ? '#e74c3c' : '#3498db'};"></div>
+                                <div class="segment-name">${segment.label}</div>
+                                <div class="segment-confidence">${segment.confidence.toFixed(1)}%</div>
+                                <div class="segment-bar">
+                                    <div class="segment-bar-fill" style="width: ${segment.confidence}%;"></div>
+                                </div>
+                                <div class="segment-area">Coverage: ${segment.area_percentage}%</div>
+                            </div>
+                        `).join('') : ''}
+                    </div>
+                    
+                    <div class="result-metrics">
+                        <div class="metric-group">
+                            <h5>Segmentation Performance</h5>
+                            <div class="metric">
+                                <div class="metric-label">IoU Score:</div>
+                                <div class="metric-value">0.92</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Boundary Precision:</div>
+                                <div class="metric-value">0.89</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Processing Time:</div>
+                                <div class="metric-value">0.42s</div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-group">
+                            <h5>Model Information</h5>
+                            <div class="metric">
+                                <div class="metric-label">Model:</div>
+                                <div class="metric-value">CWA-SAM</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Base Architecture:</div>
+                                <div class="metric-value">Segment Anything (SAM)</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Fine-tuning:</div>
+                                <div class="metric-value">Wildlife Dataset</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
     
-    // Add interactivity to timeline
-    const timelineItems = container.querySelectorAll('.timeline-item');
-    timelineItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Remove active class from all items
-            timelineItems.forEach(i => {
-                i.querySelector('.timeline-marker').classList.remove('active');
-            });
-            
-            // Add active class to clicked item
-            this.querySelector('.timeline-marker').classList.add('active');
-            
-            // Show notification about timeline item
-            const timeText = this.querySelector('.timeline-time').textContent;
-            const detailText = this.querySelector('.timeline-detail').textContent.trim();
-            
-            showNotification(`Selected detection from ${timeText}: ${detailText}`, 'info');
+    // 添加控制功能
+    const controlButtons = container.querySelectorAll('.control-button');
+    controlButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.getAttribute('data-action');
+            handleSegmentationControl(action, container);
         });
+    });
+    
+    // 为图表添加动画
+    const segmentBarFills = container.querySelectorAll('.segment-bar-fill');
+    segmentBarFills.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0';
+        
+        setTimeout(() => {
+            bar.style.transition = 'width 1s ease';
+            bar.style.width = width;
+        }, 500);
     });
 }
 
 /**
- * Handle detection control actions
- * @param {string} action - Action to perform
- * @param {HTMLElement} container - Results container
+ * 处理分割控制操作
+ */
+function handleSegmentationControl(action, container) {
+    const segmentationImage = container.querySelector('.segmentation-image');
+    
+    switch (action) {
+        case 'zoom-in':
+            segmentationImage.classList.add('zoomed');
+            showNotification('Zoomed in on segmentation image', 'info');
+            break;
+            
+        case 'zoom-out':
+            segmentationImage.classList.remove('zoomed');
+            showNotification('Zoomed out to normal view', 'info');
+            break;
+            
+        case 'toggle-mask':
+            const img = segmentationImage.querySelector('img');
+            if (img.style.opacity === '0.7') {
+                img.style.opacity = '1';
+                showNotification('Showing full segmentation', 'info');
+            } else {
+                img.style.opacity = '0.7';
+                showNotification('Showing segmentation mask only', 'info');
+            }
+            break;
+            
+        case 'download':
+            simulateDownload('segmentation_results.jpg');
+            break;
+    }
+}
+
+/**
+ * 显示知识图谱结果
+ */
+function showKnowledgeGraphResults(container, species, data) {
+    container.innerHTML = `
+        <div class="analysis-result knowledge-graph-result">
+            <h4>Knowledge Graph Results</h4>
+            <div class="result-content">
+                <div class="result-visualization">
+                    <div id="result-knowledge-graph" class="knowledge-graph-container"></div>
+                </div>
+                <div class="result-details">
+                    <div class="result-summary">
+                        <p>The knowledge graph shows relationships between the ${species}, its behaviors, and environmental context.</p>
+                    </div>
+                    <div class="graph-legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #3498db;"></span>
+                            <span class="legend-label">Animal</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #e74c3c;"></span>
+                            <span class="legend-label">Behavior</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #2ecc71;"></span>
+                            <span class="legend-label">Environment</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 使用D3绘制知识图谱
+    const width = document.getElementById('result-knowledge-graph').clientWidth;
+    const height = 300;
+    
+    // 创建SVG
+    const svg = d3.select('#result-knowledge-graph')
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+    
+    // 创建力导向布局
+    const simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink(data.links).id(d => d.id).distance(100))
+        .force("charge", d3.forceManyBody().strength(-400))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("collision", d3.forceCollide().radius(d => d.size + 10));
+    
+    // 创建连接
+    const link = svg.append("g")
+        .selectAll(".graph-link")
+        .data(data.links)
+        .enter()
+        .append("path")
+        .attr("class", "graph-link")
+        .attr("stroke", d => getLinkColor(d.type))
+        .attr("stroke-width", 2)
+        .attr("opacity", 0.7)
+        .attr("fill", "none");
+    
+    // 创建连接标签
+    const linkLabel = svg.append("g")
+        .selectAll(".link-label")
+        .data(data.links)
+        .enter()
+        .append("text")
+        .attr("class", "link-label")
+        .attr("text-anchor", "middle")
+        .attr("font-size", "12px")
+        .attr("dy", -5)
+        .attr("fill", d => getLinkColor(d.type))
+        .text(d => d.type);
+    
+    // 创建节点
+    const node = svg.append("g")
+        .selectAll(".graph-node")
+        .data(data.nodes)
+        .enter()
+        .append("g")
+        .attr("class", "graph-node")
+        .call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended));
+    
+    // 添加节点圆形
+    node.append("circle")
+        .attr("r", d => d.size)
+        .attr("fill", d => getNodeColor(d.group))
+        .attr("stroke", "white")
+        .attr("stroke-width", 2)
+        .attr("opacity", 0.85);
+    
+    // 添加节点标签
+    node.append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "0.3em")
+        .attr("fill", "white")
+        .attr("font-weight", "bold")
+        .attr("font-size", d => d.size > 30 ? "14px" : "12px")
+        .text(d => d.label);
+    
+    // 更新模拟的tick函数
+    simulation.on("tick", () => {
+        // 约束节点在边界内
+        data.nodes.forEach(d => {
+            d.x = Math.max(d.size, Math.min(width - d.size, d.x));
+            d.y = Math.max(d.size, Math.min(height - d.size, d.y));
+        });
+        
+        // 更新连接路径 - 使用曲线路径
+        link.attr("d", d => {
+            // 创建曲线连接
+            const dx = d.target.x - d.source.x;
+            const dy = d.target.y - d.source.y;
+            const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+            
+            // 计算考虑节点大小的源和目标点
+            const sourceSize = data.nodes.find(n => n.id === d.source.id).size;
+            const targetSize = data.nodes.find(n => n.id === d.target.id).size;
+            
+            const angle = Math.atan2(dy, dx);
+            const sourceX = d.source.x + Math.cos(angle) * sourceSize;
+            const sourceY = d.source.y + Math.sin(angle) * sourceSize;
+            // 移除箭头额外的偏移
+            const targetX = d.target.x - Math.cos(angle) * targetSize;
+            const targetY = d.target.y - Math.sin(angle) * targetSize;
+            
+            return `M${sourceX},${sourceY} A${dr},${dr} 0 0,1 ${targetX},${targetY}`;
+        });
+        
+        // 更新连接标签位置
+        linkLabel.attr("transform", d => {
+            // 简单地放在连接的中点
+            const midX = (d.source.x + d.target.x) / 2;
+            const midY = (d.source.y + d.target.y) / 2;
+            return `translate(${midX}, ${midY})`;
+        });
+        
+        // 更新节点位置
+        node.attr("transform", d => `translate(${d.x}, ${d.y})`);
+    });
+    
+    // 拖动函数
+    function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+    
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+    
+    function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+    
+    // 获取节点颜色
+    function getNodeColor(group) {
+        const colors = {
+            1: "#3498db",  // 动物
+            2: "#e74c3c",  // 行为
+            3: "#2ecc71"   // 环境
+        };
+        return colors[group] || "#95a5a6";
+    }
+    
+    // 获取连接颜色
+    function getLinkColor(type) {
+        const typeMap = {
+            "lie": "green",
+            "sniff": "red",
+            "near": "purple",
+            "walk": "red",
+            "eating": "orange",
+            "hunting": "red",
+            "resting": "blue"
+        };
+        
+        return typeMap[type] || "blue";
+    }
+}
+
+/**
+ * 显示描述结果
+ */
+function showDescriptionResults(container, species, data) {
+    container.innerHTML = `
+        <div class="analysis-result description-result">
+            <h4>Behavior Description Results</h4>
+            <div class="result-content">
+                <div class="result-terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-buttons">
+                            <span class="terminal-button"></span>
+                            <span class="terminal-button"></span>
+                            <span class="terminal-button"></span>
+                        </div>
+                        <div class="terminal-title">Behavior Description</div>
+                    </div>
+                    <div class="terminal-body">
+                        <div class="terminal-line command">> Generate description for ${species}</div>
+                        <div class="terminal-line response typing-text-container">
+                            <span class="typing-text" data-text="Analyzing visual features..."></span>
+                        </div>
+                        <div class="terminal-line response typing-text-container delay-1">
+                            <span class="typing-text" data-text="Integrating with knowledge graph..."></span>
+                        </div>
+                        <div class="terminal-line response description typing-text-container delay-2">
+                            <span class="typing-text" data-text="${data.description}"></span>
+                        </div>
+                        <div class="terminal-line response typing-text-container delay-3">
+                            <span class="typing-text" data-text="Description confidence: 92.4%"></span>
+                        </div>
+                        <div class="terminal-line cursor">> _</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 初始化打字动画
+    const typingElements = container.querySelectorAll('.typing-text');
+    typingElements.forEach((element, index) => {
+        setTimeout(() => {
+            initiateTypingAnimation(element);
+        }, index * 1500);
+    });
+}
+
+// /**
+//  * Show object detection results
+//  * @param {HTMLElement} container - Results container
+//  * @param {string} species - Selected species
+//  */
+// function showDetectionResults(container, species) {
+//     container.innerHTML = `
+//         <div class="analysis-result">
+//             <h4>Object Detection Results</h4>
+            
+//             <div class="result-content">
+//                 <div class="result-visualization">
+//                     <div class="detection-image">
+//                         <img src="/api/placeholder/200/150" alt="${species} detection">
+//                         <div class="detection-box" style="top: 20%; left: 15%; width: 70%; height: 60%;">
+//                             <div class="detection-label">${species} (95.8%)</div>
+//                         </div>
+//                         <div class="detection-box detection-box-secondary" style="top: 60%; left: 65%; width: 25%; height: 30%;">
+//                             <div class="detection-label">Tree (87.3%)</div>
+//                         </div>
+//                     </div>
+//                     <div class="detection-controls">
+//                         <div class="control-buttons">
+//                             <button class="control-button" data-action="zoom-in">
+//                                 <i class="fas fa-search-plus"></i>
+//                             </button>
+//                             <button class="control-button" data-action="zoom-out">
+//                                 <i class="fas fa-search-minus"></i>
+//                             </button>
+//                             <button class="control-button" data-action="toggle-boxes">
+//                                 <i class="fas fa-eye"></i>
+//                             </button>
+//                             <button class="control-button" data-action="download">
+//                                 <i class="fas fa-download"></i>
+//                             </button>
+//                         </div>
+//                         <div class="confidence-slider">
+//                             <label for="confidence-threshold">Confidence Threshold:</label>
+//                             <input type="range" id="confidence-threshold" min="0" max="100" value="70" class="slider">
+//                             <span class="slider-value">70%</span>
+//                         </div>
+//                     </div>
+//                 </div>
+                
+//                 <div class="result-details">
+//                     <div class="result-summary">
+//                         <p>The YOLO-based detection model successfully identified a <strong>${species}</strong> in the image with high confidence. The bounding box indicates the precise location of the animal within the frame.</p>
+//                     </div>
+                    
+//                     <div class="detection-classes">
+//                         <h5>Detected Classes</h5>
+//                         <div class="class-item">
+//                             <div class="class-color" style="background-color: #e74c3c;"></div>
+//                             <div class="class-name">${species}</div>
+//                             <div class="class-confidence">95.8%</div>
+//                             <div class="class-bar">
+//                                 <div class="class-bar-fill" style="width: 95.8%;"></div>
+//                             </div>
+//                         </div>
+//                         <div class="class-item">
+//                             <div class="class-color" style="background-color: #27ae60;"></div>
+//                             <div class="class-name">Tree</div>
+//                             <div class="class-confidence">87.3%</div>
+//                             <div class="class-bar">
+//                                 <div class="class-bar-fill" style="width: 87.3%;"></div>
+//                             </div>
+//                         </div>
+//                         <div class="class-item">
+//                             <div class="class-color" style="background-color: #3498db;"></div>
+//                             <div class="class-name">Grass</div>
+//                             <div class="class-confidence">82.1%</div>
+//                             <div class="class-bar">
+//                                 <div class="class-bar-fill" style="width: 82.1%;"></div>
+//                             </div>
+//                         </div>
+//                     </div>
+                    
+//                     <div class="result-metrics">
+//                         <div class="metric-group">
+//                             <h5>Detection Performance</h5>
+//                             <div class="metric">
+//                                 <div class="metric-label">Confidence Score:</div>
+//                                 <div class="metric-value">95.8%</div>
+//                             </div>
+//                             <div class="metric">
+//                                 <div class="metric-label">IoU Score:</div>
+//                                 <div class="metric-value">0.89</div>
+//                             </div>
+//                             <div class="metric">
+//                                 <div class="metric-label">Processing Time:</div>
+//                                 <div class="metric-value">0.18s</div>
+//                             </div>
+//                         </div>
+                        
+//                         <div class="metric-group">
+//                             <h5>Model Information</h5>
+//                             <div class="metric">
+//                                 <div class="metric-label">Model:</div>
+//                                 <div class="metric-value">YOLO v5</div>
+//                             </div>
+//                             <div class="metric">
+//                                 <div class="metric-label">Resolution:</div>
+//                                 <div class="metric-value">640x640</div>
+//                             </div>
+//                             <div class="metric">
+//                                 <div class="metric-label">Optimization:</div>
+//                                 <div class="metric-value">TensorRT</div>
+//                             </div>
+//                         </div>
+//                     </div>
+                    
+//                     <div class="detection-history">
+//                         <h5>Detection History</h5>
+//                         <div class="history-timeline">
+//                             <div class="timeline-item">
+//                                 <div class="timeline-marker active"></div>
+//                                 <div class="timeline-content">
+//                                     <div class="timeline-time">Now</div>
+//                                     <div class="timeline-detail">
+//                                         <strong>${species}</strong> detected (95.8%)
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                             <div class="timeline-item">
+//                                 <div class="timeline-marker"></div>
+//                                 <div class="timeline-content">
+//                                     <div class="timeline-time">10:23 AM</div>
+//                                     <div class="timeline-detail">
+//                                         <strong>${species}</strong> detected (92.3%)
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                             <div class="timeline-item">
+//                                 <div class="timeline-marker"></div>
+//                                 <div class="timeline-content">
+//                                     <div class="timeline-time">09:15 AM</div>
+//                                     <div class="timeline-detail">
+//                                         <strong>Detection initialized</strong>
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     `;
+    
+//     // Add animation to detection boxes
+//     setTimeout(() => {
+//         const detectionBoxes = container.querySelectorAll('.detection-box');
+//         detectionBoxes.forEach(box => {
+//             box.classList.add('active');
+//         });
+//     }, 300);
+    
+//     // Add functionality to control buttons
+//     const controlButtons = container.querySelectorAll('.control-button');
+//     controlButtons.forEach(button => {
+//         button.addEventListener('click', function() {
+//             const action = this.getAttribute('data-action');
+//             handleDetectionControl(action, container);
+//         });
+//     });
+    
+//     // Add functionality to confidence slider
+//     const confidenceSlider = container.querySelector('#confidence-threshold');
+//     const sliderValue = container.querySelector('.slider-value');
+    
+//     if (confidenceSlider && sliderValue) {
+//         confidenceSlider.addEventListener('input', function() {
+//             const value = this.value;
+//             sliderValue.textContent = `${value}%`;
+            
+//             // Apply threshold effect - hide detections below threshold
+//             const detectionBoxes = container.querySelectorAll('.detection-box');
+//             detectionBoxes.forEach(box => {
+//                 const labelElement = box.querySelector('.detection-label');
+//                 if (labelElement) {
+//                     const confidenceText = labelElement.textContent;
+//                     const confidenceMatch = confidenceText.match(/\((\d+\.\d+)%\)/);
+                    
+//                     if (confidenceMatch) {
+//                         const confidence = parseFloat(confidenceMatch[1]);
+                        
+//                         if (confidence < value) {
+//                             box.style.opacity = '0.2';
+//                             box.style.borderStyle = 'dashed';
+//                         } else {
+//                             box.style.opacity = '1';
+//                             box.style.borderStyle = 'solid';
+//                         }
+//                     }
+//                 }
+//             });
+            
+//             // Apply threshold to class items
+//             const classItems = container.querySelectorAll('.class-item');
+//             classItems.forEach(item => {
+//                 const confidenceElement = item.querySelector('.class-confidence');
+//                 if (confidenceElement) {
+//                     const confidence = parseFloat(confidenceElement.textContent);
+                    
+//                     if (confidence < value) {
+//                         item.style.opacity = '0.4';
+//                     } else {
+//                         item.style.opacity = '1';
+//                     }
+//                 }
+//             });
+//         });
+//     }
+    
+//     // Add animation to bars
+//     const classBarFills = container.querySelectorAll('.class-bar-fill');
+//     classBarFills.forEach(bar => {
+//         const width = bar.style.width;
+//         bar.style.width = '0';
+        
+//         setTimeout(() => {
+//             bar.style.transition = 'width 1s ease';
+//             bar.style.width = width;
+//         }, 500);
+//     });
+    
+//     // Add interactivity to timeline
+//     const timelineItems = container.querySelectorAll('.timeline-item');
+//     timelineItems.forEach(item => {
+//         item.addEventListener('click', function() {
+//             // Remove active class from all items
+//             timelineItems.forEach(i => {
+//                 i.querySelector('.timeline-marker').classList.remove('active');
+//             });
+            
+//             // Add active class to clicked item
+//             this.querySelector('.timeline-marker').classList.add('active');
+            
+//             // Show notification about timeline item
+//             const timeText = this.querySelector('.timeline-time').textContent;
+//             const detailText = this.querySelector('.timeline-detail').textContent.trim();
+            
+//             showNotification(`Selected detection from ${timeText}: ${detailText}`, 'info');
+//         });
+//     });
+// }
+
+/**
+ * 处理检测控制操作
  */
 function handleDetectionControl(action, container) {
     const detectionImage = container.querySelector('.detection-image');
@@ -819,23 +1440,95 @@ function handleDetectionControl(action, container) {
             break;
             
         case 'toggle-boxes':
-            const boxes = container.querySelectorAll('.detection-box');
-            const areVisible = boxes[0].style.display !== 'none';
+            const img = detectionImage.querySelector('img');
+            const currentSrc = img.src;
             
-            boxes.forEach(box => {
-                box.style.display = areVisible ? 'none' : 'block';
-            });
-            
-            showNotification(
-                areVisible ? 'Detection boxes hidden' : 'Detection boxes shown', 
-                'info'
-            );
+            // 这里我们使用一个标志来记录当前状态
+            if (detectionImage.dataset.boxesVisible === 'false') {
+                // 如果边界框当前隐藏，切换回带边界框的图像
+                img.src = detectionImage.dataset.originalSrc || currentSrc;
+                detectionImage.dataset.boxesVisible = 'true';
+                showNotification('Showing detection boxes', 'info');
+            } else {
+                // 如果边界框当前显示，保存原始图像并请求无边界框的图像
+                if (!detectionImage.dataset.originalSrc) {
+                    detectionImage.dataset.originalSrc = currentSrc;
+                }
+                // 这里我们应该从后端请求无边界框的图像，但为了演示暂时只显示通知
+                detectionImage.dataset.boxesVisible = 'false';
+                showNotification('Hiding detection boxes (functionality would fetch plain image)', 'info');
+            }
             break;
             
         case 'download':
-            simulateDownload('detection_results.jpg');
+            // 保存当前图像
+            const image = detectionImage.querySelector('img');
+            const link = document.createElement('a');
+            link.href = image.src;
+            link.download = `${new Date().toISOString().slice(0,10)}_detection_results.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showNotification('Image downloaded successfully', 'success');
             break;
     }
+}
+/**
+ * Show notification message
+ * @param {string} message - Message to display
+ * @param {string} type - Type of notification (success, warning, error, info)
+ */
+function showNotification(message, type = 'info') {
+    // 检查是否已存在通知容器
+    let notificationContainer = document.querySelector('.notification-container');
+    
+    if (!notificationContainer) {
+        // 创建通知容器
+        notificationContainer = document.createElement('div');
+        notificationContainer.className = 'notification-container';
+        document.body.appendChild(notificationContainer);
+    }
+    
+    // 创建新通知
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    
+    // 添加图标
+    let icon = 'info-circle';
+    if (type === 'success') icon = 'check-circle';
+    if (type === 'warning') icon = 'exclamation-triangle';
+    if (type === 'error') icon = 'times-circle';
+    
+    // 设置通知内容
+    notification.innerHTML = `
+        <div class="notification-icon">
+            <i class="fas fa-${icon}"></i>
+        </div>
+        <div class="notification-message">${message}</div>
+        <div class="notification-close">
+            <i class="fas fa-times"></i>
+        </div>
+    `;
+    
+    // 添加通知到容器
+    notificationContainer.appendChild(notification);
+    
+    // 添加关闭功能
+    const closeButton = notification.querySelector('.notification-close');
+    closeButton.addEventListener('click', function() {
+        notification.classList.add('fade-out');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    });
+    
+    // 自动淡出
+    setTimeout(() => {
+        notification.classList.add('fade-out');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 5000);
 }
 
 /**

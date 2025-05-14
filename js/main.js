@@ -3,6 +3,20 @@
  * Handles core functionality, animations, and interactions
  */
 
+/**
+ * Initialize innovation section visuals
+ */
+function initInnovationVisuals() {
+    // 初始化分割视觉效果
+    initSegmentationVisual();
+    
+    // 初始化DABPM视觉效果
+    initDABPMVisual();
+    
+    // 初始化LLM视觉效果
+    initLLMVisual();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize components with staggered timing
     initNavigation();
@@ -16,6 +30,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
     setupModalInteractions();
 });
+
+
+
+/**
+ * Initialize the segmentation visualization in the innovations section
+ */
+function initSegmentationVisual() {
+    const container = document.getElementById('segmentation-visual');
+    if (!container) return;
+    
+    // 简单实现，如果需要更复杂的效果可以后续添加
+}
+
+/**
+ * Initialize the LLM visualization in the innovations section
+ */
+function initLLMVisual() {
+    const container = document.getElementById('llm-visual');
+    if (!container) return;
+    
+    // 简单实现，如果需要更复杂的效果可以后续添加
+}
 
 /**
  * Initialize navigation functionality
@@ -406,49 +442,88 @@ function setupSpeciesSelection() {
 }
 
 /**
- * Load images for a selected species
- * @param {string} species - The selected species
+ * Load images for the selected species
+ * @param {string} species - Selected species name
  */
 function loadSpeciesImages(species) {
     const imagesContainer = document.getElementById('species-images');
     if (!imagesContainer) return;
     
-    // Clear current images
-    imagesContainer.innerHTML = '';
+    // 移除no-selection消息如果存在
+    const noSelectionMsg = imagesContainer.querySelector('.no-selection-message');
+    if (noSelectionMsg) {
+        noSelectionMsg.remove();
+    }
     
-    // Add loading animation
+    // 显示加载动画
     imagesContainer.innerHTML = `
         <div class="loading-indicator">
             <div class="loader"></div>
-            <p>Loading ${species} images...</p>
+            <p>Loading images for ${species}...</p>
         </div>
     `;
     
-    // Simulate loading delay
-    setTimeout(() => {
-        // Clear loading indicator
-        imagesContainer.innerHTML = '';
-        
-        // Add sample images for the species
-        for (let i = 1; i <= 4; i++) {
-            const imageItem = document.createElement('div');
-            imageItem.className = 'image-item';
-            // Add image and checkbox with proper path naming convention
-            imageItem.innerHTML = `
-            <img src="../data/${species.toLowerCase()}${i}" alt="${species} ${i}">
-            <div class="image-checkbox">
-                <i class="fas fa-check"></i>
-            </div>
+    // 从本地Flask后端获取图片
+    console.log(`Fetching images for species: ${species}`);
+    fetch(`http://localhost:5000/api/species/${species}/images`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 输出API响应数据以便调试
+            console.log(`API Response for ${species}:`, data);
+            
+            // 清除加载指示器
+            imagesContainer.innerHTML = '';
+            
+            // 添加图片到容器
+            if (data.images && data.images.length > 0) {
+                console.log(`Found ${data.images.length} images for ${species}`);
+                data.images.forEach(imageInfo => {
+                    console.log(`Adding image: ${imageInfo.url}`);
+                    // 创建图片容器
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'image-item';
+                    imageItem.setAttribute('data-image-id', imageInfo.id);
+                    
+                    // 添加图片和复选框
+                    imageItem.innerHTML = `
+                        <img src="http://localhost:5000${imageInfo.url}" alt="${species} ${imageInfo.id}">
+                        <div class="image-checkbox">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    `;
+                    
+                    // 添加点击处理程序以切换选择
+                    imageItem.addEventListener('click', function() {
+                        this.classList.toggle('selected');
+                        updateUploadButtonState();
+                    });
+                    
+                    // 添加图片到容器
+                    imagesContainer.appendChild(imageItem);
+                });
+            } else {
+                console.log(`No images found for ${species}`);
+                imagesContainer.innerHTML = `
+                    <div class="no-images-message">
+                        <p>No images available for ${species}</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading images:', error);
+            imagesContainer.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Error loading images: ${error.message}</p>
+                </div>
             `;
-            
-            // Add click handler to toggle selection
-            imageItem.addEventListener('click', function() {
-                this.classList.toggle('selected');
-            });
-            
-            imagesContainer.appendChild(imageItem);
-        }
-    }, 1000);
+        });
 }
 
 /**

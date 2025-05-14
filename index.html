@@ -123,8 +123,8 @@
                                 <div class="species-icon"><img src="./data/RhinopithecusRoxellana.png" alt="RhinopithecusRoxellana icon"></div>
                                 <div class="species-name">Rhinopithecus<br>Roxellana</div>
                             </div>
-                            <div class="species-item" data-species="ManchurianTiger">
-                                <div class="species-icon"><img src="./data/AmurTiger.png" alt="ManchurianTiger icon"></div>
+                            <div class="species-item" data-species="AmurTiger">
+                                <div class="species-icon"><img src="./data/AmurTiger.png" alt="AmurTiger icon"></div>
                                 <div class="species-name">Amur<br>Tiger</div>
                             </div>
                         </div>
@@ -386,16 +386,22 @@
             <div id="modal-caption"></div>
         </div>
     </div>
-    <script>
-        fetch("http://127.0.0.1:5000/api/hello")
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("response").innerText = data.message;
-            })
-            .catch(error => {
-                document.getElementById("response").innerText = "Error: " + error;
-            });
-    </script>
+<script>
+    // 测试与后端的连接
+    fetch("http://localhost:5000/api/hello")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Backend connection successful:", data.message);
+        })
+        .catch(error => {
+            console.error("Backend connection error:", error);
+        });
+</script>
     <script src="js/main.js"></script>
     <script src="js/workflow.js"></script>
     <script src="js/knowledge-graph.js"></script>
