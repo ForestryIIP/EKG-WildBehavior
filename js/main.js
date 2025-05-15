@@ -465,7 +465,7 @@ function loadSpeciesImages(species) {
     
     // 从本地Flask后端获取图片
     console.log(`Fetching images for species: ${species}`);
-    fetch(`https://120.53.14.250:5000/api/species/${species}/images`)
+    fetch(`//120.53.14.250:5000/api/species/${species}/images`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -491,7 +491,7 @@ function loadSpeciesImages(species) {
                     
                     // 添加图片和复选框
                     imageItem.innerHTML = `
-                        <img src="https://120.53.14.250:5000${imageInfo.url}" alt="${species} ${imageInfo.id}">
+                        <img src="//120.53.14.250:5000${imageInfo.url}" alt="${species} ${imageInfo.id}">
                         <div class="image-checkbox">
                             <i class="fas fa-check"></i>
                         </div>
