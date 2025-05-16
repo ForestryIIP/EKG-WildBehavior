@@ -3,24 +3,34 @@
  * Manages species selection, image handling, and analysis display
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize applications section after a short delay
-    setTimeout(() => {
-        initApplicationsSection();
-    }, 1000);
+let analysisButtonsInitialized = false;
+
+document.addEventListener("DOMContentLoaded", function () {
+  // 初始化应用程序部分
+  setTimeout(() => {
+    initApplicationsSection();
+  }, 1000);
+
+  // 隐藏上传按钮，但保持其他功能正常
+  setTimeout(() => {
+    const uploadButton = document.getElementById("upload-button");
+    if (uploadButton) {
+      uploadButton.style.display = "none"; // 隐藏上传按钮
+    }
+  }, 500);
 });
 
 /**
  * Initialize the applications section
  */
 function initApplicationsSection() {
-    // Add image styles first
-    addImageStyles();
-    
-    // Then setup functionality
-    setupSpeciesSelection();
-    setupAnalysisButtons();
-    setupImageUpload();
+  // Add image styles first
+  addImageStyles();
+
+  // Then setup functionality
+  setupSpeciesSelection();
+  setupAnalysisButtons();
+  setupImageUpload();
 }
 
 // CSS styles for image items to ensure proper sizing and 2x2 grid layout
@@ -108,86 +118,89 @@ const imageStyles = `
 
 // Add image styles to the document
 function addImageStyles() {
-    // Check if image-styles element exists
-    let styleElement = document.getElementById('image-styles');
-    if (styleElement) {
-        // Update existing styles
-        styleElement.textContent = imageStyles;
-    } else {
-        // Create new style element
-        styleElement = document.createElement('style');
-        styleElement.id = 'image-styles';
-        styleElement.textContent = imageStyles;
-        document.head.appendChild(styleElement);
-    }
+  // Check if image-styles element exists
+  let styleElement = document.getElementById("image-styles");
+  if (styleElement) {
+    // Update existing styles
+    styleElement.textContent = imageStyles;
+  } else {
+    // Create new style element
+    styleElement = document.createElement("style");
+    styleElement.id = "image-styles";
+    styleElement.textContent = imageStyles;
+    document.head.appendChild(styleElement);
+  }
 }
 
 // Call this function when document is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    addImageStyles();
-    addDetectionStyles();
+document.addEventListener("DOMContentLoaded", function () {
+  addImageStyles();
+  addDetectionStyles();
 });
 
 function setupImageUpload() {
-    const uploadButton = document.getElementById('upload-button');
-    
-    if (uploadButton) {
-        uploadButton.addEventListener('click', function() {
-            // Check if species is selected
-            const selectedSpecies = document.querySelector('.species-item.active');
-            if (!selectedSpecies) {
-                showNotification('Please select a species first', 'warning');
-                return;
-            }
-            
-            // Check if exactly one image is selected
-            const selectedImages = document.querySelectorAll('.image-item.selected');
-            if (selectedImages.length === 0) {
-                showNotification('Please select an image', 'warning');
-                return;
-            }
-            
-            // Get selected image info
-            const selectedImage = selectedImages[0];
-            const imageId = selectedImage.getAttribute('data-image-id');
-            const speciesName = selectedSpecies.getAttribute('data-species');
-            const imageSrc = selectedImage.querySelector('img').src;
-            
-            // Simulate upload process
-            this.disabled = true;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-            
-            // First clear the backend/image folder
-            clearImageFolder()
-                .then(() => {
-                    // Then upload the selected image
-                    return uploadImageToBackend(imageSrc, speciesName, imageId);
-                })
-                .then(() => {
-                    this.innerHTML = '<i class="fas fa-check"></i> Upload Complete';
-                    
-                    // Show success modal
-                    showSuccessModal(speciesName, imageId);
-                    
-                    // Reset button after delay
-                    setTimeout(() => {
-                        this.innerHTML = '<i class="fas fa-upload"></i> Upload Selected Images';
-                        this.disabled = false;
-                    }, 2000);
-                })
-                .catch(error => {
-                    // Handle any errors
-                    this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Upload Failed';
-                    showNotification(`Upload failed: ${error.message}`, 'error');
-                    
-                    // Reset button after delay
-                    setTimeout(() => {
-                        this.innerHTML = '<i class="fas fa-upload"></i> Upload Selected Images';
-                        this.disabled = false;
-                    }, 2000);
-                });
+  const uploadButton = document.getElementById("upload-button");
+
+  if (uploadButton) {
+    uploadButton.addEventListener("click", function () {
+      // Check if species is selected
+      const selectedSpecies = document.querySelector(".species-item.active");
+      if (!selectedSpecies) {
+        showNotification("Please select a species first", "warning");
+        return;
+      }
+
+      // Check if exactly one image is selected
+      const selectedImages = document.querySelectorAll(".image-item.selected");
+      if (selectedImages.length === 0) {
+        showNotification("Please select an image", "warning");
+        return;
+      }
+
+      // Get selected image info
+      const selectedImage = selectedImages[0];
+      const imageId = selectedImage.getAttribute("data-image-id");
+      const speciesName = selectedSpecies.getAttribute("data-species");
+      const imageSrc = selectedImage.querySelector("img").src;
+
+      // Simulate upload process
+      this.disabled = true;
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+      // First clear the backend/image folder
+      clearImageFolder()
+        .then(() => {
+          // Then upload the selected image
+          return uploadImageToBackend(imageSrc, speciesName, imageId);
+        })
+        .then(() => {
+          this.innerHTML = '<i class="fas fa-check"></i> Upload Complete';
+
+          // Show success modal
+          showSuccessModal(speciesName, imageId);
+
+          // Reset button after delay
+          setTimeout(() => {
+            this.innerHTML =
+              '<i class="fas fa-upload"></i> Upload Selected Images';
+            this.disabled = false;
+          }, 2000);
+        })
+        .catch((error) => {
+          // Handle any errors
+          this.innerHTML =
+            '<i class="fas fa-exclamation-triangle"></i> Upload Failed';
+          showNotification(`Upload failed: ${error.message}`, "error");
+
+          // Reset button after delay
+          setTimeout(() => {
+            this.innerHTML =
+              '<i class="fas fa-upload"></i> Upload Selected Images';
+            this.disabled = false;
+          }, 2000);
         });
-    }
+    });
+  }
 }
 
 /**
@@ -195,34 +208,34 @@ function setupImageUpload() {
  * @returns {Promise} Promise that resolves when folder is cleared
  */
 function clearImageFolder() {
-    return new Promise((resolve, reject) => {
-        // Create a request to clear the folder
-        const request = new XMLHttpRequest();
-        request.open('POST', '/api/clear-images', true);
-        request.setRequestHeader('Content-Type', 'application/json');
-        
-        request.onload = function() {
-            if (this.status >= 200 && this.status < 400) {
-                // Success
-                resolve();
-            } else {
-                // Server error
-                reject(new Error('Server returned error when clearing folder'));
-            }
-        };
-        
-        request.onerror = function() {
-            // Connection error
-            reject(new Error('Connection error when clearing folder'));
-        };
-        
-        // Send the request
-        request.send(JSON.stringify({ folder: '../backend/image' }));
-        
-        // For demonstration, resolve immediately 
-        // In real implementation, remove this line and use the actual request
+  return new Promise((resolve, reject) => {
+    // Create a request to clear the folder
+    const request = new XMLHttpRequest();
+    request.open("POST", "/api/clear-images", true);
+    request.setRequestHeader("Content-Type", "application/json");
+
+    request.onload = function () {
+      if (this.status >= 200 && this.status < 400) {
+        // Success
         resolve();
-    });
+      } else {
+        // Server error
+        reject(new Error("Server returned error when clearing folder"));
+      }
+    };
+
+    request.onerror = function () {
+      // Connection error
+      reject(new Error("Connection error when clearing folder"));
+    };
+
+    // Send the request
+    request.send(JSON.stringify({ folder: "../backend/image" }));
+
+    // For demonstration, resolve immediately
+    // In real implementation, remove this line and use the actual request
+    resolve();
+  });
 }
 
 /**
@@ -233,46 +246,50 @@ function clearImageFolder() {
  * @returns {Promise} Promise that resolves when image is uploaded
  */
 function uploadImageToBackend(imageSrc, species, imageId) {
-    return new Promise((resolve, reject) => {
-        // For client-side image, we need to first fetch it as blob
-        fetch(imageSrc)
-            .then(response => response.blob())
-            .then(blob => {
-                // Create FormData and append the image
-                const formData = new FormData();
-                formData.append('image', blob, `${species.toLowerCase()}${imageId}.jpg`);
-                formData.append('folder', '../backend/image');
-                
-                // Create upload request
-                const request = new XMLHttpRequest();
-                request.open('POST', '/api/upload-image', true);
-                
-                request.onload = function() {
-                    if (this.status >= 200 && this.status < 400) {
-                        // Success
-                        resolve();
-                    } else {
-                        // Server error
-                        reject(new Error('Server returned error when uploading image'));
-                    }
-                };
-                
-                request.onerror = function() {
-                    // Connection error
-                    reject(new Error('Connection error when uploading image'));
-                };
-                
-                // Send the request
-                request.send(formData);
-                
-                // For demonstration, resolve immediately
-                // In real implementation, remove this line and use the actual request
-                resolve();
-            })
-            .catch(error => {
-                reject(new Error(`Failed to process image: ${error.message}`));
-            });
-    });
+  return new Promise((resolve, reject) => {
+    // For client-side image, we need to first fetch it as blob
+    fetch(imageSrc)
+      .then((response) => response.blob())
+      .then((blob) => {
+        // Create FormData and append the image
+        const formData = new FormData();
+        formData.append(
+          "image",
+          blob,
+          `${species.toLowerCase()}${imageId}.jpg`
+        );
+        formData.append("folder", "../backend/image");
+
+        // Create upload request
+        const request = new XMLHttpRequest();
+        request.open("POST", "/api/upload-image", true);
+
+        request.onload = function () {
+          if (this.status >= 200 && this.status < 400) {
+            // Success
+            resolve();
+          } else {
+            // Server error
+            reject(new Error("Server returned error when uploading image"));
+          }
+        };
+
+        request.onerror = function () {
+          // Connection error
+          reject(new Error("Connection error when uploading image"));
+        };
+
+        // Send the request
+        request.send(formData);
+
+        // For demonstration, resolve immediately
+        // In real implementation, remove this line and use the actual request
+        resolve();
+      })
+      .catch((error) => {
+        reject(new Error(`Failed to process image: ${error.message}`));
+      });
+  });
 }
 
 /**
@@ -281,17 +298,17 @@ function uploadImageToBackend(imageSrc, species, imageId) {
  * @param {string} imageId - Selected image ID
  */
 function showSuccessModal(species, imageId) {
-    // Create modal backdrop
-    const modalBackdrop = document.createElement('div');
-    modalBackdrop.className = 'modal-backdrop';
-    document.body.appendChild(modalBackdrop);
-    
-    // Create modal container
-    const modal = document.createElement('div');
-    modal.className = 'success-modal';
-    
-    // Set modal content
-    modal.innerHTML = `
+  // Create modal backdrop
+  const modalBackdrop = document.createElement("div");
+  modalBackdrop.className = "modal-backdrop";
+  document.body.appendChild(modalBackdrop);
+
+  // Create modal container
+  const modal = document.createElement("div");
+  modal.className = "success-modal";
+
+  // Set modal content
+  modal.innerHTML = `
         <div class="success-modal-content">
             <div class="success-icon">
                 <i class="fas fa-check-circle"></i>
@@ -315,72 +332,72 @@ function showSuccessModal(species, imageId) {
             <button class="close-modal-btn">Close</button>
         </div>
     `;
-    
-    // Add modal to body
-    document.body.appendChild(modal);
-    
-    // Add modal CSS for smooth animation
+
+  // Add modal to body
+  document.body.appendChild(modal);
+
+  // Add modal CSS for smooth animation
+  modal.style.opacity = 0;
+  modal.style.transform = "translateY(-20px)";
+
+  // Trigger animation
+  setTimeout(() => {
+    modal.style.opacity = 1;
+    modal.style.transform = "translateY(0)";
+  }, 10);
+
+  // Add close button functionality
+  const closeButton = modal.querySelector(".close-modal-btn");
+  closeButton.addEventListener("click", function () {
+    // Fade out animations
     modal.style.opacity = 0;
-    modal.style.transform = 'translateY(-20px)';
-    
-    // Trigger animation
+    modal.style.transform = "translateY(-20px)";
+    modalBackdrop.style.opacity = 0;
+
+    // Remove elements after animation
     setTimeout(() => {
-        modal.style.opacity = 1;
-        modal.style.transform = 'translateY(0)';
-    }, 10);
-    
-    // Add close button functionality
-    const closeButton = modal.querySelector('.close-modal-btn');
-    closeButton.addEventListener('click', function() {
-        // Fade out animations
-        modal.style.opacity = 0;
-        modal.style.transform = 'translateY(-20px)';
-        modalBackdrop.style.opacity = 0;
-        
-        // Remove elements after animation
-        setTimeout(() => {
-            document.body.removeChild(modal);
-            document.body.removeChild(modalBackdrop);
-        }, 300);
-    });
-    
-    // Also close on backdrop click
-    modalBackdrop.addEventListener('click', function() {
-        closeButton.click();
-    });
+      document.body.removeChild(modal);
+      document.body.removeChild(modalBackdrop);
+    }, 300);
+  });
+
+  // Also close on backdrop click
+  modalBackdrop.addEventListener("click", function () {
+    closeButton.click();
+  });
 }
 
 /**
  * Set up species selection functionality
  */
 function setupSpeciesSelection() {
-    const speciesItems = document.querySelectorAll('.species-item');
-    const imagesContainer = document.getElementById('species-images');
-    const uploadButton = document.getElementById('upload-button');
-    
-    if (!speciesItems.length || !imagesContainer || !uploadButton) return;
-    
-    // Handle species selection
-    speciesItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Deselect all species
-            speciesItems.forEach(species => {
-                species.classList.remove('active');
-            });
-            
-            // Select clicked species
-            this.classList.add('active');
-            
-            // Get species name
-            const species = this.getAttribute('data-species');
-            
-            // Load images for the selected species
-            loadSpeciesImages(species);
-            
-            // Enable upload button
-            uploadButton.disabled = false;
-        });
+  const speciesItems = document.querySelectorAll(".species-item");
+  const imagesContainer = document.getElementById("species-images");
+  const uploadButton = document.getElementById("upload-button");
+
+  if (!speciesItems.length || !imagesContainer || !uploadButton) return;
+
+  // Handle species selection
+  speciesItems.forEach((item) => {
+    item.addEventListener("click", function () {
+      // Deselect all species
+      speciesItems.forEach((species) => {
+        species.classList.remove("active");
+      });
+
+      // Select clicked species
+      this.classList.add("active");
+
+      // Get species name
+      const species = this.getAttribute("data-species");
+
+      // Load images for the selected species
+      loadSpeciesImages(species);
+
+      // Enable upload button
+      uploadButton.disabled = false;
     });
+  });
 }
 
 /**
@@ -388,196 +405,212 @@ function setupSpeciesSelection() {
  * @param {string} species - Selected species name
  */
 function loadSpeciesImages(species) {
-    const imagesContainer = document.getElementById('species-images');
-    if (!imagesContainer) return;
-    
-    // 移除no-selection消息如果存在
-    const noSelectionMsg = imagesContainer.querySelector('.no-selection-message');
-    if (noSelectionMsg) {
-        noSelectionMsg.remove();
-    }
-    
-    // 显示加载动画
-    imagesContainer.innerHTML = `
+  const imagesContainer = document.getElementById("species-images");
+  if (!imagesContainer) return;
+
+  // 移除no-selection消息如果存在
+  const noSelectionMsg = imagesContainer.querySelector(".no-selection-message");
+  if (noSelectionMsg) {
+    noSelectionMsg.remove();
+  }
+
+  // 显示加载动画
+  imagesContainer.innerHTML = `
         <div class="loading-indicator">
             <div class="loader"></div>
             <p>Loading images for ${species}...</p>
         </div>
     `;
-    
-    // 从本地Flask后端获取图片
-    fetch(`//120.53.14.250:5000/api/species/${species}/images`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // 清除加载指示器
-            imagesContainer.innerHTML = '';
-            
-            // 添加图片到容器
-            if (data.images && data.images.length > 0) {
-                data.images.forEach(imageInfo => {
-                    // 创建图片容器
-                    const imageItem = document.createElement('div');
-                    imageItem.className = 'image-item';
-                    imageItem.setAttribute('data-image-id', imageInfo.id);
-                    
-                    // 添加图片和复选框
-                    imageItem.innerHTML = `
+
+  // 从本地Flask后端获取图片
+  fetch(`//120.53.14.250:5000/api/species/${species}/images`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      // 清除加载指示器
+      imagesContainer.innerHTML = "";
+
+      // 添加图片到容器
+      if (data.images && data.images.length > 0) {
+        data.images.forEach((imageInfo) => {
+          // 创建图片容器
+          const imageItem = document.createElement("div");
+          imageItem.className = "image-item";
+          imageItem.setAttribute("data-image-id", imageInfo.id);
+
+          // 添加图片和复选框
+          imageItem.innerHTML = `
                         <img src="//120.53.14.250:5000${imageInfo.url}" alt="${species} ${imageInfo.id}">
                         <div class="image-checkbox">
                             <i class="fas fa-check"></i>
                         </div>
                     `;
-                    
-                    // 添加点击处理程序以切换选择
-                    imageItem.addEventListener('click', function() {
-                        this.classList.toggle('selected');
-                        updateUploadButtonState();
-                    });
-                    
-                    // 添加图片到容器
-                    imagesContainer.appendChild(imageItem);
-                });
-            } else {
-                imagesContainer.innerHTML = `
+
+          // 添加点击处理程序以切换选择
+          // 添加点击处理程序以实现单选
+          imageItem.addEventListener("click", function () {
+            // 先取消所有图片的选择
+            const allImages = document.querySelectorAll(".image-item");
+            allImages.forEach((img) => img.classList.remove("selected"));
+
+            // 选择当前点击的图片
+            this.classList.add("selected");
+
+            // 更新上传按钮状态
+            updateUploadButtonState();
+          });
+
+          // 添加图片到容器
+          imagesContainer.appendChild(imageItem);
+        });
+      } else {
+        imagesContainer.innerHTML = `
                     <div class="no-images-message">
                         <p>No images available for ${species}</p>
                     </div>
                 `;
-            }
-        })
-        .catch(error => {
-            console.error('Error loading images:', error);
-            imagesContainer.innerHTML = `
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading images:", error);
+      imagesContainer.innerHTML = `
                 <div class="error-message">
                     <i class="fas fa-exclamation-circle"></i>
                     <p>Error loading images: ${error.message}</p>
                 </div>
             `;
-        });
+    });
 }
 
 /**
  * Update upload button state based on image selection
  */
 function updateUploadButtonState() {
-    const selectedImages = document.querySelectorAll('.image-item.selected');
-    const uploadButton = document.getElementById('upload-button');
-    
-    if (uploadButton) {
-        // Enable button if at least one image is selected
-        uploadButton.disabled = selectedImages.length === 0;
-    }
+  const selectedImages = document.querySelectorAll(".image-item.selected");
+  const uploadButton = document.getElementById("upload-button");
+
+  if (uploadButton) {
+    // Enable button if at least one image is selected
+    uploadButton.disabled = selectedImages.length === 0;
+  }
 }
 
 /**
  * Set up analysis buttons functionality
  */
 function setupAnalysisButtons() {
-    const analysisButtons = document.querySelectorAll('.analysis-button');
-    const resultsContainer = document.getElementById('results-container');
-    
-    if (!analysisButtons.length || !resultsContainer) return;
-    
-    // 处理分析按钮点击
-    analysisButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // 检查是否选择了物种
-            const selectedSpecies = document.querySelector('.species-item.active');
-            if (!selectedSpecies) {
-                showNotification('Please select a species first', 'warning');
-                return;
-            }
-            
-            // 检查是否至少选择了一张图片
-            const selectedImages = document.querySelectorAll('.image-item.selected');
-            if (selectedImages.length === 0) {
-                showNotification('Please select at least one image', 'warning');
-                return;
-            }
-            
-            // 获取分析类型
-            const analysisType = this.getAttribute('data-analysis');
-            
-            // 高亮活动按钮
-            analysisButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            // 显示加载状态
-            resultsContainer.innerHTML = `
+  // 防止重复初始化
+  if (analysisButtonsInitialized) return;
+
+  const analysisButtons = document.querySelectorAll(".analysis-button");
+  const resultsContainer = document.getElementById("results-container");
+
+  if (!analysisButtons.length || !resultsContainer) return;
+
+  // 处理分析按钮点击
+  analysisButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      // 检查是否选择了物种
+      const selectedSpecies = document.querySelector(".species-item.active");
+      if (!selectedSpecies) {
+        showNotification("Please select a species first", "warning");
+        return;
+      }
+
+      // 检查是否至少选择了一张图片
+      const selectedImages = document.querySelectorAll(".image-item.selected");
+      if (selectedImages.length === 0) {
+        showNotification("Please select at least one image", "warning");
+        return;
+      }
+
+      // 获取分析类型
+      const analysisType = this.getAttribute("data-analysis");
+
+      // 高亮活动按钮
+      analysisButtons.forEach((btn) => btn.classList.remove("active"));
+      this.classList.add("active");
+
+      // 显示加载状态
+      resultsContainer.innerHTML = `
                 <div class="loading-indicator">
                     <div class="loader"></div>
-                    <p>Running ${formatAnalysisType(analysisType)} analysis...</p>
+                    <p>Running ${formatAnalysisType(
+                      analysisType
+                    )} analysis...</p>
                 </div>
             `;
-            
-            // 获取选中的物种和图片ID
-            const species = selectedSpecies.getAttribute('data-species');
-            const imageId = selectedImages[0].getAttribute('data-image-id');
-            
-            // 调用相应的分析API
-            performAnalysis(analysisType, species, imageId, resultsContainer);
-        });
+
+      // 获取选中的物种和图片ID
+      const species = selectedSpecies.getAttribute("data-species");
+      const imageId = selectedImages[0].getAttribute("data-image-id");
+
+      // 调用相应的分析API
+      performAnalysis(analysisType, species, imageId, resultsContainer);
     });
+  });
+
+  // 设置标志，表示已初始化
+  analysisButtonsInitialized = true;
 }
 
 /**
  * 执行分析并显示结果
  */
 function performAnalysis(analysisType, species, imageId, resultsContainer) {
-    const endpoint = `//120.53.14.250:5000/api/analyze/${analysisType}`;
-    
-    fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            species: species,
-            imageId: imageId
-        }),
+  const endpoint = `//120.53.14.250:5000/api/analyze/${analysisType}`;
+
+  fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      species: species,
+      imageId: imageId,
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        // 根据分析类型显示结果
-        switch (analysisType) {
-            case 'detection':
-                showDetectionResults(resultsContainer, species, data);
-                break;
-                
-            case 'segmentation':
-                showSegmentationResults(resultsContainer, species, data);
-                break;
-                
-            case 'knowledge-graph':
-                showKnowledgeGraphResults(resultsContainer, species, data);
-                break;
-                
-            case 'description':
-                showDescriptionResults(resultsContainer, species, data);
-                break;
-                
-            default:
-                resultsContainer.innerHTML = `
+    .then((data) => {
+      // 根据分析类型显示结果
+      switch (analysisType) {
+        case "detection":
+          showDetectionResults(resultsContainer, species, data);
+          break;
+
+        case "segmentation":
+          showSegmentationResults(resultsContainer, species, data);
+          break;
+
+        case "knowledge-graph":
+          showKnowledgeGraphResults(resultsContainer, species, data);
+          break;
+
+        case "description":
+          showDescriptionResults(resultsContainer, species, data);
+          break;
+
+        default:
+          resultsContainer.innerHTML = `
                     <div class="error-message">
                         <i class="fas fa-exclamation-triangle"></i>
                         <p>Unknown analysis type: ${analysisType}</p>
                     </div>
                 `;
-        }
+      }
     })
-    .catch(error => {
-        console.error(`Error performing ${analysisType} analysis:`, error);
-        resultsContainer.innerHTML = `
+    .catch((error) => {
+      console.error(`Error performing ${analysisType} analysis:`, error);
+      resultsContainer.innerHTML = `
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
                 <p>Error: ${error.message}</p>
@@ -592,9 +625,10 @@ function performAnalysis(analysisType, species, imageId, resultsContainer) {
  * @returns {string} Formatted analysis type
  */
 function formatAnalysisType(type) {
-    return type.split('-').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+  return type
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 /**
@@ -603,56 +637,57 @@ function formatAnalysisType(type) {
  * @param {string} species - Selected species
  */
 function showAnalysisResults(analysisType, species) {
-    const resultsContainer = document.getElementById('results-container');
-    if (!resultsContainer) return;
-    
-    // Remove results-placeholder if present
-    const placeholder = resultsContainer.querySelector('.results-placeholder');
-    if (placeholder) {
-        placeholder.remove();
-    }
-    
-    switch (analysisType) {
-        case 'detection':
-            showDetectionResults(resultsContainer, species);
-            break;
-            
-        case 'segmentation':
-            showSegmentationResults(resultsContainer, species);
-            break;
-            
-        case 'knowledge-graph':
-            showKnowledgeGraphResults(resultsContainer, species);
-            break;
-            
-        case 'description':
-            showDescriptionResults(resultsContainer, species);
-            break;
-            
-        default:
-            resultsContainer.innerHTML = `
+  const resultsContainer = document.getElementById("results-container");
+  if (!resultsContainer) return;
+
+  // Remove results-placeholder if present
+  const placeholder = resultsContainer.querySelector(".results-placeholder");
+  if (placeholder) {
+    placeholder.remove();
+  }
+
+  switch (analysisType) {
+    case "detection":
+      showDetectionResults(resultsContainer, species);
+      break;
+
+    case "segmentation":
+      showSegmentationResults(resultsContainer, species);
+      break;
+
+    case "knowledge-graph":
+      showKnowledgeGraphResults(resultsContainer, species);
+      break;
+
+    case "description":
+      showDescriptionResults(resultsContainer, species);
+      break;
+
+    default:
+      resultsContainer.innerHTML = `
                 <div class="error-message">
                     <i class="fas fa-exclamation-triangle"></i>
                     <p>Unknown analysis type: ${analysisType}</p>
                 </div>
             `;
-    }
+  }
 }
 
 /**
  * 显示目标检测结果
  */
 function showDetectionResults(container, species, data) {
-    // 定义不同对象类型的颜色
-    const objectColors = {
-        "tiger": "#e74c3c",
-        "panda": "#e74c3c",
-        "tree": "#27ae60",
-        "grass": "#3498db",
-        "default": "#f39c12"
-    };
-    
-    container.innerHTML = `
+  // 使用后端返回的性能指标
+  const performanceMetrics = data.performance || {
+    objects_detected: data.objects.length,
+    avg_confidence: (
+      data.objects.reduce((sum, obj) => sum + obj.confidence, 0) /
+      data.objects.length
+    ).toFixed(1),
+    processing_time: 0.18,
+  };
+
+  container.innerHTML = `
         <div class="analysis-result">
             <h4>Object Detection Results</h4>
             
@@ -686,29 +721,49 @@ function showDetectionResults(container, species, data) {
                 
                 <div class="result-details">
                     <div class="result-summary">
-                        <p>The YOLO-based detection model successfully identified ${data.objects.length} objects in the image, including a <strong>${species}</strong> with high confidence.</p>
+                        <p>The YOLO-based detection model successfully identified ${
+                          data.objects.length
+                        } objects in the image, including a <strong>${species}</strong> with high confidence.</p>
                     </div>
                     
                     <div class="detection-classes">
                         <h5>Detected Classes</h5>
-                        ${data.objects.map(obj => {
+                        ${data.objects
+                          .map((obj) => {
                             // 确定对象类型的颜色
-                            const objType = Object.keys(objectColors).find(type => 
+                            const objType =
+                              Object.keys({
+                                tiger: "#e74c3c",
+                                panda: "#e74c3c",
+                                tree: "#27ae60",
+                                grass: "#3498db",
+                                default: "#f39c12",
+                              }).find((type) =>
                                 obj.label.toLowerCase().includes(type)
-                            ) || "default";
-                            const color = obj.color || objectColors[objType];
-                            
+                              ) || "default";
+                            const color = obj.color || "#f39c12";
+
                             return `
-                                <div class="class-item" data-confidence="${obj.confidence}">
+                                <div class="class-item" data-confidence="${
+                                  obj.confidence
+                                }">
                                     <div class="class-color" style="background-color: ${color};"></div>
-                                    <div class="class-name">${obj.label.charAt(0).toUpperCase() + obj.label.slice(1)}</div>
-                                    <div class="class-confidence">${obj.confidence.toFixed(1)}%</div>
+                                    <div class="class-name">${
+                                      obj.label.charAt(0).toUpperCase() +
+                                      obj.label.slice(1)
+                                    }</div>
+                                    <div class="class-confidence">${obj.confidence.toFixed(
+                                      1
+                                    )}%</div>
                                     <div class="class-bar">
-                                        <div class="class-bar-fill" style="width: ${obj.confidence}%; background-color: ${color};"></div>
+                                        <div class="class-bar-fill" style="width: ${
+                                          obj.confidence
+                                        }%; background-color: ${color};"></div>
                                     </div>
                                 </div>
                             `;
-                        }).join('')}
+                          })
+                          .join("")}
                     </div>
                     
                     <div class="result-metrics">
@@ -716,74 +771,86 @@ function showDetectionResults(container, species, data) {
                             <h5>Detection Performance</h5>
                             <div class="metric">
                                 <div class="metric-label">Objects Detected:</div>
-                                <div class="metric-value">${data.objects.length}</div>
+                                <div class="metric-value">${
+                                  performanceMetrics.objects_detected
+                                }</div>
                             </div>
                             <div class="metric">
                                 <div class="metric-label">Avg. Confidence Score:</div>
-                                <div class="metric-value">${(data.objects.reduce((sum, obj) => sum + obj.confidence, 0) / data.objects.length).toFixed(1)}%</div>
+                                <div class="metric-value">${
+                                  performanceMetrics.avg_confidence
+                                }%</div>
                             </div>
                             <div class="metric">
                                 <div class="metric-label">Processing Time:</div>
-                                <div class="metric-value">0.18s</div>
+                                <div class="metric-value">${
+                                  performanceMetrics.processing_time
+                                }s</div>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
             </div>
         </div>
     `;
-    
-    // 添加功能到控制按钮
-    const controlButtons = container.querySelectorAll('.control-button');
-    controlButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const action = this.getAttribute('data-action');
-            handleDetectionControl(action, container);
-        });
+
+  // 添加功能到控制按钮
+  const controlButtons = container.querySelectorAll(".control-button");
+  controlButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const action = this.getAttribute("data-action");
+      handleDetectionControl(action, container);
     });
-    
-    // 添加功能到置信度滑块
-    const confidenceSlider = container.querySelector('#confidence-threshold');
-    const sliderValue = container.querySelector('.slider-value');
-    
-    if (confidenceSlider && sliderValue) {
-        confidenceSlider.addEventListener('input', function() {
-            const value = this.value;
-            sliderValue.textContent = `${value}%`;
-            
-            // 对置信度低于阈值的类别应用视觉效果
-            const classItems = container.querySelectorAll('.class-item');
-            classItems.forEach(item => {
-                const confidence = parseFloat(item.getAttribute('data-confidence'));
-                
-                if (confidence < value) {
-                    item.style.opacity = '0.4';
-                } else {
-                    item.style.opacity = '1';
-                }
-            });
-        });
-    }
-    
-    // 为图表添加动画
-    const classBarFills = container.querySelectorAll('.class-bar-fill');
-    classBarFills.forEach(bar => {
-        const width = bar.style.width;
-        bar.style.width = '0';
-        
-        setTimeout(() => {
-            bar.style.transition = 'width 1s ease';
-            bar.style.width = width;
-        }, 500);
+  });
+
+  // 添加功能到置信度滑块
+  const confidenceSlider = container.querySelector("#confidence-threshold");
+  const sliderValue = container.querySelector(".slider-value");
+
+  if (confidenceSlider && sliderValue) {
+    confidenceSlider.addEventListener("input", function () {
+      const value = this.value;
+      sliderValue.textContent = `${value}%`;
+
+      // 对置信度低于阈值的类别应用视觉效果
+      const classItems = container.querySelectorAll(".class-item");
+      classItems.forEach((item) => {
+        const confidence = parseFloat(item.getAttribute("data-confidence"));
+
+        if (confidence < value) {
+          item.style.opacity = "0.4";
+        } else {
+          item.style.opacity = "1";
+        }
+      });
     });
+  }
+
+  // 为图表添加动画
+  const classBarFills = container.querySelectorAll(".class-bar-fill");
+  classBarFills.forEach((bar) => {
+    const width = bar.style.width;
+    bar.style.width = "0";
+
+    setTimeout(() => {
+      bar.style.transition = "width 1s ease";
+      bar.style.width = width;
+    }, 500);
+  });
 }
 
 /**
  * 显示分割结果
  */
 function showSegmentationResults(container, species, data) {
-    container.innerHTML = `
+  // 使用后端返回的性能指标
+  const performanceMetrics = data.performance || {
+    iou_score: 0.92,
+    boundary_precision: 0.89,
+    processing_time: 0.42,
+  };
+
+  container.innerHTML = `
         <div class="analysis-result segmentation-result">
             <h4>Segmentation Results</h4>
             
@@ -817,17 +884,35 @@ function showSegmentationResults(container, species, data) {
                     
                     <div class="segmentation-classes">
                         <h5>Segmentation Classes</h5>
-                        ${data.segments ? data.segments.map(segment => `
+                        ${
+                          data.segments
+                            ? data.segments
+                                .map(
+                                  (segment) => `
                             <div class="segment-item">
-                                <div class="segment-color" style="background-color: ${segment.label === species ? '#e74c3c' : '#3498db'};"></div>
+                                <div class="segment-color" style="background-color: ${
+                                  segment.label === species
+                                    ? "#e74c3c"
+                                    : "#3498db"
+                                };"></div>
                                 <div class="segment-name">${segment.label}</div>
-                                <div class="segment-confidence">${segment.confidence.toFixed(1)}%</div>
+                                <div class="segment-confidence">${segment.confidence.toFixed(
+                                  1
+                                )}%</div>
                                 <div class="segment-bar">
-                                    <div class="segment-bar-fill" style="width: ${segment.confidence}%;"></div>
+                                    <div class="segment-bar-fill" style="width: ${
+                                      segment.confidence
+                                    }%;"></div>
                                 </div>
-                                <div class="segment-area">Coverage: ${segment.area_percentage}%</div>
+                                <div class="segment-area">Coverage: ${
+                                  segment.area_percentage
+                                }%</div>
                             </div>
-                        `).join('') : ''}
+                        `
+                                )
+                                .join("")
+                            : ""
+                        }
                     </div>
                     
                     <div class="result-metrics">
@@ -835,85 +920,90 @@ function showSegmentationResults(container, species, data) {
                             <h5>Segmentation Performance</h5>
                             <div class="metric">
                                 <div class="metric-label">IoU Score:</div>
-                                <div class="metric-value">0.92</div>
+                                <div class="metric-value">${
+                                  performanceMetrics.iou_score
+                                }</div>
                             </div>
                             <div class="metric">
                                 <div class="metric-label">Boundary Precision:</div>
-                                <div class="metric-value">0.89</div>
+                                <div class="metric-value">${
+                                  performanceMetrics.boundary_precision
+                                }</div>
                             </div>
                             <div class="metric">
                                 <div class="metric-label">Processing Time:</div>
-                                <div class="metric-value">0.42s</div>
+                                <div class="metric-value">${
+                                  performanceMetrics.processing_time
+                                }s</div>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
             </div>
         </div>
     `;
-    
-    // 添加控制功能
-    const controlButtons = container.querySelectorAll('.control-button');
-    controlButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const action = this.getAttribute('data-action');
-            handleSegmentationControl(action, container);
-        });
+
+  // 添加控制功能
+  const controlButtons = container.querySelectorAll(".control-button");
+  controlButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const action = this.getAttribute("data-action");
+      handleSegmentationControl(action, container);
     });
-    
-    // 为图表添加动画
-    const segmentBarFills = container.querySelectorAll('.segment-bar-fill');
-    segmentBarFills.forEach(bar => {
-        const width = bar.style.width;
-        bar.style.width = '0';
-        
-        setTimeout(() => {
-            bar.style.transition = 'width 1s ease';
-            bar.style.width = width;
-        }, 500);
-    });
+  });
+
+  // 为图表添加动画
+  const segmentBarFills = container.querySelectorAll(".segment-bar-fill");
+  segmentBarFills.forEach((bar) => {
+    const width = bar.style.width;
+    bar.style.width = "0";
+
+    setTimeout(() => {
+      bar.style.transition = "width 1s ease";
+      bar.style.width = width;
+    }, 500);
+  });
 }
 
 /**
  * 处理分割控制操作
  */
 function handleSegmentationControl(action, container) {
-    const segmentationImage = container.querySelector('.segmentation-image');
-    
-    switch (action) {
-        case 'zoom-in':
-            segmentationImage.classList.add('zoomed');
-            showNotification('Zoomed in on segmentation image', 'info');
-            break;
-            
-        case 'zoom-out':
-            segmentationImage.classList.remove('zoomed');
-            showNotification('Zoomed out to normal view', 'info');
-            break;
-            
-        case 'toggle-mask':
-            const img = segmentationImage.querySelector('img');
-            if (img.style.opacity === '0.7') {
-                img.style.opacity = '1';
-                showNotification('Showing full segmentation', 'info');
-            } else {
-                img.style.opacity = '0.7';
-                showNotification('Showing segmentation mask only', 'info');
-            }
-            break;
-            
-        case 'download':
-            simulateDownload('segmentation_results.jpg');
-            break;
-    }
+  const segmentationImage = container.querySelector(".segmentation-image");
+
+  switch (action) {
+    case "zoom-in":
+      segmentationImage.classList.add("zoomed");
+      showNotification("Zoomed in on segmentation image", "info");
+      break;
+
+    case "zoom-out":
+      segmentationImage.classList.remove("zoomed");
+      showNotification("Zoomed out to normal view", "info");
+      break;
+
+    case "toggle-mask":
+      const img = segmentationImage.querySelector("img");
+      if (img.style.opacity === "0.7") {
+        img.style.opacity = "1";
+        showNotification("Showing full segmentation", "info");
+      } else {
+        img.style.opacity = "0.7";
+        showNotification("Showing segmentation mask only", "info");
+      }
+      break;
+
+    case "download":
+      simulateDownload("segmentation_results.jpg");
+      break;
+  }
 }
 
 /**
  * 显示知识图谱结果
  */
 function showKnowledgeGraphResults(container, species, data) {
-    container.innerHTML = `
+  container.innerHTML = `
         <div class="analysis-result knowledge-graph-result">
             <h4>Knowledge Graph Results</h4>
             <div class="result-content">
@@ -942,168 +1032,190 @@ function showKnowledgeGraphResults(container, species, data) {
             </div>
         </div>
     `;
-    
-    // 使用D3绘制知识图谱
-    const width = document.getElementById('result-knowledge-graph').clientWidth;
-    const height = 300;
-    
-    // 创建SVG
-    const svg = d3.select('#result-knowledge-graph')
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height);
-    
-    // 创建力导向布局
-    const simulation = d3.forceSimulation(data.nodes)
-        .force("link", d3.forceLink(data.links).id(d => d.id).distance(100))
-        .force("charge", d3.forceManyBody().strength(-400))
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collision", d3.forceCollide().radius(d => d.size + 10));
-    
-    // 创建连接
-    const link = svg.append("g")
-        .selectAll(".graph-link")
-        .data(data.links)
-        .enter()
-        .append("path")
-        .attr("class", "graph-link")
-        .attr("stroke", d => getLinkColor(d.type))
-        .attr("stroke-width", 2)
-        .attr("opacity", 0.7)
-        .attr("fill", "none");
-    
-    // 创建连接标签
-    const linkLabel = svg.append("g")
-        .selectAll(".link-label")
-        .data(data.links)
-        .enter()
-        .append("text")
-        .attr("class", "link-label")
-        .attr("text-anchor", "middle")
-        .attr("font-size", "12px")
-        .attr("dy", -5)
-        .attr("fill", d => getLinkColor(d.type))
-        .text(d => d.type);
-    
-    // 创建节点
-    const node = svg.append("g")
-        .selectAll(".graph-node")
-        .data(data.nodes)
-        .enter()
-        .append("g")
-        .attr("class", "graph-node")
-        .call(d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended));
-    
-    // 添加节点圆形
-    node.append("circle")
-        .attr("r", d => d.size)
-        .attr("fill", d => getNodeColor(d.group))
-        .attr("stroke", "white")
-        .attr("stroke-width", 2)
-        .attr("opacity", 0.85);
-    
-    // 添加节点标签
-    node.append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", "0.3em")
-        .attr("fill", "white")
-        .attr("font-weight", "bold")
-        .attr("font-size", d => d.size > 30 ? "14px" : "12px")
-        .text(d => d.label);
-    
-    // 更新模拟的tick函数
-    simulation.on("tick", () => {
-        // 约束节点在边界内
-        data.nodes.forEach(d => {
-            d.x = Math.max(d.size, Math.min(width - d.size, d.x));
-            d.y = Math.max(d.size, Math.min(height - d.size, d.y));
-        });
-        
-        // 更新连接路径 - 使用曲线路径
-        link.attr("d", d => {
-            // 创建曲线连接
-            const dx = d.target.x - d.source.x;
-            const dy = d.target.y - d.source.y;
-            const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
-            
-            // 计算考虑节点大小的源和目标点
-            const sourceSize = data.nodes.find(n => n.id === d.source.id).size;
-            const targetSize = data.nodes.find(n => n.id === d.target.id).size;
-            
-            const angle = Math.atan2(dy, dx);
-            const sourceX = d.source.x + Math.cos(angle) * sourceSize;
-            const sourceY = d.source.y + Math.sin(angle) * sourceSize;
-            // 移除箭头额外的偏移
-            const targetX = d.target.x - Math.cos(angle) * targetSize;
-            const targetY = d.target.y - Math.sin(angle) * targetSize;
-            
-            return `M${sourceX},${sourceY} A${dr},${dr} 0 0,1 ${targetX},${targetY}`;
-        });
-        
-        // 更新连接标签位置
-        linkLabel.attr("transform", d => {
-            // 简单地放在连接的中点
-            const midX = (d.source.x + d.target.x) / 2;
-            const midY = (d.source.y + d.target.y) / 2;
-            return `translate(${midX}, ${midY})`;
-        });
-        
-        // 更新节点位置
-        node.attr("transform", d => `translate(${d.x}, ${d.y})`);
+
+  // 使用D3绘制知识图谱
+  const width = document.getElementById("result-knowledge-graph").clientWidth;
+  const height = 300;
+
+  // 创建SVG
+  const svg = d3
+    .select("#result-knowledge-graph")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  // 创建力导向布局
+  const simulation = d3
+    .forceSimulation(data.nodes)
+    .force(
+      "link",
+      d3
+        .forceLink(data.links)
+        .id((d) => d.id)
+        .distance(100)
+    )
+    .force("charge", d3.forceManyBody().strength(-400))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force(
+      "collision",
+      d3.forceCollide().radius((d) => d.size + 10)
+    );
+
+  // 创建连接
+  const link = svg
+    .append("g")
+    .selectAll(".graph-link")
+    .data(data.links)
+    .enter()
+    .append("path")
+    .attr("class", "graph-link")
+    .attr("stroke", (d) => getLinkColor(d.type))
+    .attr("stroke-width", 2)
+    .attr("opacity", 0.7)
+    .attr("fill", "none");
+
+  // 创建连接标签
+  const linkLabel = svg
+    .append("g")
+    .selectAll(".link-label")
+    .data(data.links)
+    .enter()
+    .append("text")
+    .attr("class", "link-label")
+    .attr("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .attr("dy", -5)
+    .attr("fill", (d) => getLinkColor(d.type))
+    .text((d) => d.type);
+
+  // 创建节点
+  const node = svg
+    .append("g")
+    .selectAll(".graph-node")
+    .data(data.nodes)
+    .enter()
+    .append("g")
+    .attr("class", "graph-node")
+    .call(
+      d3
+        .drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended)
+    );
+
+  // 添加节点圆形
+  node
+    .append("circle")
+    .attr("r", (d) => d.size)
+    .attr("fill", (d) => getNodeColor(d.group))
+    .attr("stroke", "white")
+    .attr("stroke-width", 2)
+    .attr("opacity", 0.85);
+
+  // 添加节点标签
+  node
+    .append("text")
+    .attr("text-anchor", "middle")
+    .attr("dy", "0.3em")
+    .attr("fill", "white")
+    .attr("font-weight", "bold")
+    .attr("font-size", (d) => (d.size > 30 ? "14px" : "12px"))
+    .text((d) => d.label);
+
+  // 更新模拟的tick函数
+  simulation.on("tick", () => {
+    // 约束节点在边界内
+    data.nodes.forEach((d) => {
+      d.x = Math.max(d.size, Math.min(width - d.size, d.x));
+      d.y = Math.max(d.size, Math.min(height - d.size, d.y));
     });
-    
-    // 拖动函数
-    function dragstarted(event, d) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-    }
-    
-    function dragged(event, d) {
-        d.fx = event.x;
-        d.fy = event.y;
-    }
-    
-    function dragended(event, d) {
-        if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-    }
-    
-    // 获取节点颜色
-    function getNodeColor(group) {
-        const colors = {
-            1: "#3498db",  // 动物
-            2: "#e74c3c",  // 行为
-            3: "#2ecc71"   // 环境
-        };
-        return colors[group] || "#95a5a6";
-    }
-    
-    // 获取连接颜色
-    function getLinkColor(type) {
-        const typeMap = {
-            "lie": "green",
-            "sniff": "red",
-            "near": "purple",
-            "walk": "red",
-            "eating": "orange",
-            "hunting": "red",
-            "resting": "blue"
-        };
-        
-        return typeMap[type] || "blue";
-    }
+
+    // 更新连接路径 - 使用曲线路径
+    link.attr("d", (d) => {
+      // 创建曲线连接
+      const dx = d.target.x - d.source.x;
+      const dy = d.target.y - d.source.y;
+      const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+
+      // 计算考虑节点大小的源和目标点
+      const sourceSize = data.nodes.find((n) => n.id === d.source.id).size;
+      const targetSize = data.nodes.find((n) => n.id === d.target.id).size;
+
+      const angle = Math.atan2(dy, dx);
+      const sourceX = d.source.x + Math.cos(angle) * sourceSize;
+      const sourceY = d.source.y + Math.sin(angle) * sourceSize;
+      // 移除箭头额外的偏移
+      const targetX = d.target.x - Math.cos(angle) * targetSize;
+      const targetY = d.target.y - Math.sin(angle) * targetSize;
+
+      return `M${sourceX},${sourceY} A${dr},${dr} 0 0,1 ${targetX},${targetY}`;
+    });
+
+    // 更新连接标签位置
+    linkLabel.attr("transform", (d) => {
+      // 简单地放在连接的中点
+      const midX = (d.source.x + d.target.x) / 2;
+      const midY = (d.source.y + d.target.y) / 2;
+      return `translate(${midX}, ${midY})`;
+    });
+
+    // 更新节点位置
+    node.attr("transform", (d) => `translate(${d.x}, ${d.y})`);
+  });
+
+  // 拖动函数
+  function dragstarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+  }
+
+  function dragended(event, d) {
+    if (!event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
+
+  // 获取节点颜色
+  function getNodeColor(group) {
+    const colors = {
+      1: "#3498db", // 动物
+      2: "#e74c3c", // 行为
+      3: "#2ecc71", // 环境
+    };
+    return colors[group] || "#95a5a6";
+  }
+
+  // 获取连接颜色
+  function getLinkColor(type) {
+    const typeMap = {
+      lie: "green",
+      sniff: "red",
+      near: "purple",
+      walk: "red",
+      eating: "orange",
+      hunting: "red",
+      resting: "blue",
+    };
+
+    return typeMap[type] || "blue";
+  }
 }
 
 /**
  * 显示描述结果
  */
 function showDescriptionResults(container, species, data) {
-    container.innerHTML = `
+  // 使用后端返回的置信度
+  const confidence = data.confidence || 92.4;
+
+  container.innerHTML = `
         <div class="analysis-result description-result">
             <h4>Behavior Description Results</h4>
             <div class="result-content">
@@ -1128,7 +1240,7 @@ function showDescriptionResults(container, species, data) {
                             <span class="typing-text" data-text="${data.description}"></span>
                         </div>
                         <div class="terminal-line response typing-text-container delay-3">
-                            <span class="typing-text" data-text="Description confidence: 92.4%"></span>
+                            <span class="typing-text" data-text="Description confidence: ${confidence}%"></span>
                         </div>
                         <div class="terminal-line cursor">> _</div>
                     </div>
@@ -1136,95 +1248,100 @@ function showDescriptionResults(container, species, data) {
             </div>
         </div>
     `;
-    
-    // 初始化打字动画
-    const typingElements = container.querySelectorAll('.typing-text');
-    typingElements.forEach((element, index) => {
-        setTimeout(() => {
-            initiateTypingAnimation(element);
-        }, index * 1500);
-    });
+
+  // 初始化打字动画
+  const typingElements = container.querySelectorAll(".typing-text");
+  typingElements.forEach((element, index) => {
+    setTimeout(() => {
+      initiateTypingAnimation(element);
+    }, index * 1500);
+  });
 }
 
 /**
  * 处理检测控制操作
  */
 function handleDetectionControl(action, container) {
-    const detectionImage = container.querySelector('.detection-image');
-    
-    switch (action) {
-        case 'zoom-in':
-            detectionImage.classList.add('zoomed');
-            showNotification('Zoomed in on detection image', 'info');
-            break;
-            
-        case 'zoom-out':
-            detectionImage.classList.remove('zoomed');
-            showNotification('Zoomed out to normal view', 'info');
-            break;
-            
-        case 'toggle-boxes':
-            const img = detectionImage.querySelector('img');
-            const currentSrc = img.src;
-            
-            // 这里我们使用一个标志来记录当前状态
-            if (detectionImage.dataset.boxesVisible === 'false') {
-                // 如果边界框当前隐藏，切换回带边界框的图像
-                img.src = detectionImage.dataset.originalSrc || currentSrc;
-                detectionImage.dataset.boxesVisible = 'true';
-                showNotification('Showing detection boxes', 'info');
-            } else {
-                // 如果边界框当前显示，保存原始图像并请求无边界框的图像
-                if (!detectionImage.dataset.originalSrc) {
-                    detectionImage.dataset.originalSrc = currentSrc;
-                }
-                // 这里我们应该从后端请求无边界框的图像，但为了演示暂时只显示通知
-                detectionImage.dataset.boxesVisible = 'false';
-                showNotification('Hiding detection boxes (functionality would fetch plain image)', 'info');
-            }
-            break;
-            
-        case 'download':
-            // 保存当前图像
-            const image = detectionImage.querySelector('img');
-            const link = document.createElement('a');
-            link.href = image.src;
-            link.download = `${new Date().toISOString().slice(0,10)}_detection_results.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showNotification('Image downloaded successfully', 'success');
-            break;
-    }
+  const detectionImage = container.querySelector(".detection-image");
+
+  switch (action) {
+    case "zoom-in":
+      detectionImage.classList.add("zoomed");
+      showNotification("Zoomed in on detection image", "info");
+      break;
+
+    case "zoom-out":
+      detectionImage.classList.remove("zoomed");
+      showNotification("Zoomed out to normal view", "info");
+      break;
+
+    case "toggle-boxes":
+      const img = detectionImage.querySelector("img");
+      const currentSrc = img.src;
+
+      // 这里我们使用一个标志来记录当前状态
+      if (detectionImage.dataset.boxesVisible === "false") {
+        // 如果边界框当前隐藏，切换回带边界框的图像
+        img.src = detectionImage.dataset.originalSrc || currentSrc;
+        detectionImage.dataset.boxesVisible = "true";
+        showNotification("Showing detection boxes", "info");
+      } else {
+        // 如果边界框当前显示，保存原始图像并请求无边界框的图像
+        if (!detectionImage.dataset.originalSrc) {
+          detectionImage.dataset.originalSrc = currentSrc;
+        }
+        // 这里我们应该从后端请求无边界框的图像，但为了演示暂时只显示通知
+        detectionImage.dataset.boxesVisible = "false";
+        showNotification(
+          "Hiding detection boxes (functionality would fetch plain image)",
+          "info"
+        );
+      }
+      break;
+
+    case "download":
+      // 保存当前图像
+      const image = detectionImage.querySelector("img");
+      const link = document.createElement("a");
+      link.href = image.src;
+      link.download = `${new Date()
+        .toISOString()
+        .slice(0, 10)}_detection_results.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showNotification("Image downloaded successfully", "success");
+      break;
+  }
 }
 /**
  * Show notification message
  * @param {string} message - Message to display
  * @param {string} type - Type of notification (success, warning, error, info)
  */
-function showNotification(message, type = 'info') {
-    // 检查是否已存在通知容器
-    let notificationContainer = document.querySelector('.notification-container');
-    
-    if (!notificationContainer) {
-        // 创建通知容器
-        notificationContainer = document.createElement('div');
-        notificationContainer.className = 'notification-container';
-        document.body.appendChild(notificationContainer);
-    }
-    
-    // 创建新通知
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    
-    // 添加图标
-    let icon = 'info-circle';
-    if (type === 'success') icon = 'check-circle';
-    if (type === 'warning') icon = 'exclamation-triangle';
-    if (type === 'error') icon = 'times-circle';
-    
-    // 设置通知内容
-    notification.innerHTML = `
+function showNotification(message, type = "info") {
+  // 检查是否已存在通知容器
+  let notificationContainer = document.querySelector(".notification-container");
+
+  if (!notificationContainer) {
+    // 创建通知容器
+    notificationContainer = document.createElement("div");
+    notificationContainer.className = "notification-container";
+    document.body.appendChild(notificationContainer);
+  }
+
+  // 创建新通知
+  const notification = document.createElement("div");
+  notification.className = `notification notification-${type}`;
+
+  // 添加图标
+  let icon = "info-circle";
+  if (type === "success") icon = "check-circle";
+  if (type === "warning") icon = "exclamation-triangle";
+  if (type === "error") icon = "times-circle";
+
+  // 设置通知内容
+  notification.innerHTML = `
         <div class="notification-icon">
             <i class="fas fa-${icon}"></i>
         </div>
@@ -1233,26 +1350,26 @@ function showNotification(message, type = 'info') {
             <i class="fas fa-times"></i>
         </div>
     `;
-    
-    // 添加通知到容器
-    notificationContainer.appendChild(notification);
-    
-    // 添加关闭功能
-    const closeButton = notification.querySelector('.notification-close');
-    closeButton.addEventListener('click', function() {
-        notification.classList.add('fade-out');
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    });
-    
-    // 自动淡出
+
+  // 添加通知到容器
+  notificationContainer.appendChild(notification);
+
+  // 添加关闭功能
+  const closeButton = notification.querySelector(".notification-close");
+  closeButton.addEventListener("click", function () {
+    notification.classList.add("fade-out");
     setTimeout(() => {
-        notification.classList.add('fade-out');
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 5000);
+      notification.remove();
+    }, 300);
+  });
+
+  // 自动淡出
+  setTimeout(() => {
+    notification.classList.add("fade-out");
+    setTimeout(() => {
+      notification.remove();
+    }, 300);
+  }, 5000);
 }
 
 /**
@@ -1260,12 +1377,12 @@ function showNotification(message, type = 'info') {
  * @param {string} filename - Name of file to download
  */
 function simulateDownload(filename) {
-    showNotification(`Downloading ${filename}...`, 'info');
-    
-    // Simulate download delay
-    setTimeout(() => {
-        showNotification(`${filename} downloaded successfully`, 'success');
-    }, 1500);
+  showNotification(`Downloading ${filename}...`, "info");
+
+  // Simulate download delay
+  setTimeout(() => {
+    showNotification(`${filename} downloaded successfully`, "success");
+  }, 1500);
 }
 
 // CSS styles to add for the detection functionality
@@ -1530,21 +1647,21 @@ const detectionStyles = `
 
 // Add these styles to the application styles section
 function addDetectionStyles() {
-    // Check if application-styles element exists
-    let styleElement = document.getElementById('application-styles');
-    if (styleElement) {
-        // Append detection styles to existing styles
-        styleElement.textContent += detectionStyles;
-    } else {
-        // Create new style element
-        styleElement = document.createElement('style');
-        styleElement.id = 'application-styles';
-        styleElement.textContent = detectionStyles;
-        document.head.appendChild(styleElement);
-    }
+  // Check if application-styles element exists
+  let styleElement = document.getElementById("application-styles");
+  if (styleElement) {
+    // Append detection styles to existing styles
+    styleElement.textContent += detectionStyles;
+  } else {
+    // Create new style element
+    styleElement = document.createElement("style");
+    styleElement.id = "application-styles";
+    styleElement.textContent = detectionStyles;
+    document.head.appendChild(styleElement);
+  }
 }
 
 // Call this function when document is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    addDetectionStyles();
+document.addEventListener("DOMContentLoaded", function () {
+  addDetectionStyles();
 });
