@@ -36,8 +36,8 @@ Our approach integrates **multi-modal information extraction**, **knowledge grap
 
 We're excited to announce that our EKG-WildBehavior system is now live and accessible online!
 
-- **Website URL**: http://120.53.14.250/ 
-- **Release Date**: May 16, 2025 
+- **Website URL**: http://120.53.14.250/   (Test Link Closed.)
+- **Release Date**: May 16, 2025 - May 23, 2025 
 - **Version**: 1.0
 
 ------
